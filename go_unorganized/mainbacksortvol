@@ -1,0 +1,323 @@
+package main
+
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+)
+
+var (
+	// None used for defining type volume in runtime spec.
+	None = "none"
+	// Bind used for defining type bind in runtime spec.
+	Bind = "bind"
+	// Anonymous used for defining type anonymous mount in runtime spec while not stored back to host.
+	Anonymous = "vmwarenative"
+	// HostVolume used for specified volume which will be mount back to host.
+	HostVolume = "volume"
+)
+
+// Mount used for testing,
+type Mount struct {
+	Type        *string
+	Destination *string
+	Source      *string
+}
+
+// regenMounts re-generates mounts' spec according to Destination relations.
+func regenMounts(mounts, defaultmounts []*Mount, mountmap map[string][]*Mount) ([]*Mount, error) {
+	if len(mounts) == 0 {
+		res := defaultmounts[:]
+		for _, val := range mountmap {
+			res = append(res, val...)
+		}
+		fmt.Println(&mounts, &res[0])
+		return res, nil
+	}
+	m := mounts[0]
+	if !checkUserDefinedMount(m) {
+		defaultmounts = append(defaultmounts, m)
+		mounts = mounts[1:]
+		goto RETURN
+	}
+	if len(mountmap) != 0 {
+		for k := range mountmap {
+			rela, err := checkParentChild(k, *m.Destination)
+			if err != nil {
+				return nil, err
+			}
+			// fmt.Println(k, *m.Destination, rela)
+			if rela {
+				mountmap[k] = append(mountmap[k], m)
+				mountmap[k] = reorderMounts(mountmap[k])
+				mounts = mounts[1:]
+				goto RETURN
+			}
+		}
+	}
+	mountmap[*m.Destination] = []*Mount{m}
+RETURN:
+	return regenMounts(mounts, defaultmounts, mountmap)
+}
+
+// regenMounts re-generates mounts' spec according to Destination relations.
+// func regenMounts(mounts []*Mount) ([]*Mount, error) {
+// 	if len(mounts) == 0 || len(mounts) == 1 {
+// 		return mounts, nil
+// 	}
+// 	mntSector := map[string][]*Mount{
+// 		"default": {},
+// 	}
+// 	record := []int{}
+// 	used := []int{}
+// 	checkExists := func(in []int, tgt int) bool {
+// 		for i := range in {
+// 			if in[i] == tgt {
+// 				return true
+// 			}
+// 		}
+// 		return false
+// 	}
+// 	for i, v1 := range mounts {
+// 		if !checkUserDefinedMount(v1) {
+// 			mntSector["default"] = append(mntSector["default"], v1)
+// 			continue
+// 		}
+// 		used = append(used, record[:]...)
+// 		if checkExists(used, i) {
+// 			continue
+// 		}
+// 		if len(mntSector[*v1.Destination]) == 0 {
+// 			mntSector[*v1.Destination] = append(mntSector[*v1.Destination], v1)
+// 		}
+// 		record = []int{}
+// 		for j, v2 := range mounts {
+// 			if i >= j {
+// 				continue
+// 			}
+// 			relation, err := dirRelation(*v1.Destination, *v2.Destination)
+// 			if err != nil {
+// 				return nil, err
+// 			}
+// 			if relation {
+// 				record = append(record, j)
+// 			}
+// 		}
+// 		for n := range record {
+// 			mntSector[*v1.Destination] = append(mntSector[*v1.Destination], mounts[record[n]])
+// 		}
+// 	}
+// 	res := []*Mount{}
+// 	fmt.Println(len(mntSector))
+// 	for k, val := range mntSector {
+// 		if k == "default" {
+// 			res = append(res, val...)
+// 			continue
+// 		}
+// 		res = append(res, reorderMounts(val)...)
+// 	}
+// 	return res, nil
+// }
+
+// reorderMounts removes duplicated mounts and reorder mounts according to
+// the relationship from Destination.
+func reorderMounts(tgt []*Mount) []*Mount {
+	var temp *Mount
+	for i := 0; i < len(tgt)-1; i++ {
+		for j := i + 1; j < len(tgt); j++ {
+			if len(*tgt[i].Destination) > len(*tgt[j].Destination) {
+				temp = tgt[j]
+				tgt[j] = tgt[i]
+				tgt[i] = temp
+			}
+		}
+	}
+	for i := 0; i < len(tgt)-1; i++ {
+		for j := i + 1; j < len(tgt); j++ {
+			if *tgt[i].Destination == *tgt[j].Destination {
+				idx, same := checkDupAnonyVol(i, j, tgt[i], tgt[j])
+				if same && idx == -1 {
+					tgt = append(tgt[:j], tgt[j+1:]...)
+				}
+				if idx != -1 && !same {
+					if idx == i {
+						// Make sure j is the anonymous mount.
+						temp = tgt[j]
+						tgt[j] = tgt[i]
+						tgt[i] = temp
+					}
+					tgt = append(tgt[:j], tgt[j+1:]...)
+				}
+			}
+		}
+	}
+	return tgt
+}
+
+// checkDupAnonyVol checks if there is a volume same as anonymous one.
+// i is the index of a, j is the index of b in mount spec.
+// i must be smaller than j.
+// returns the anonymous index.
+func checkDupAnonyVol(i, j int, a, b *Mount) (int, bool) { // nolint: gocyclo
+	var (
+		idx      = -1
+		sameType = false
+	)
+	if *b.Type == Anonymous || *b.Type == HostVolume {
+		if *a.Type == Bind || *a.Type == None {
+			idx = j
+			sameType = false
+		}
+	}
+	if *b.Type == Bind || *b.Type == None {
+		if *a.Type == Anonymous || *a.Type == HostVolume {
+			idx = i
+			sameType = false
+		}
+	}
+	if *b.Type == Bind || *b.Type == None {
+		if *a.Type == Bind || *a.Type == None {
+			idx = -1
+			sameType = true
+		}
+	}
+	if *b.Type == Anonymous || *b.Type == HostVolume {
+		if *a.Type == Anonymous || *a.Type == HostVolume {
+			idx = -1
+			sameType = true
+		}
+	}
+	return idx, sameType
+}
+
+func checkParentChild(path1, path2 string) (bool, error) {
+	var relation bool
+	var subpath string
+	subpath, err := filepath.Rel(path1, path2)
+	if err != nil {
+		return false, err
+	}
+	if checkParentHelper(subpath) {
+		return true, nil
+	}
+	return relation, nil
+}
+
+func checkParentHelper(relapath string) bool {
+	if relapath == "." {
+		return true
+	}
+	if !strings.Contains(relapath, "..") {
+		return true
+	}
+	relapath = strings.ReplaceAll(relapath, string(filepath.Separator), "")
+	if len(relapath)%2 != 0 {
+		return false
+	}
+	relapath = strings.ReplaceAll(relapath, "..", "")
+	if len(relapath) != 0 {
+		return false
+	}
+	return true
+}
+
+func checkUserDefinedMount(tgt *Mount) bool {
+	if *tgt.Type == Bind || *tgt.Type == None ||
+		*tgt.Type == Anonymous || *tgt.Type == HostVolume {
+		return true
+	} else if *tgt.Destination == "/lib/modules" {
+		// For kind use.
+		return true
+	}
+	return false
+}
+
+func main() {
+	var err error
+	defaultmounts := []*Mount{}
+	commonSource := "test"
+	typeM := "none"
+	typeD := "mqueue"
+	typeA := "volume"
+	typeT := "tmpfs"
+	dst1 := "/var/lib/mysql"
+	dst2 := "/var/lib/mysql/sys"
+	dst3 := "/dev/mqueue"
+	dst4 := "/var/lib"
+	dst5 := "/var/lib/mysql/sys/def"
+	dst6 := "/dev/stdin"
+	dst7 := "/opt/bonita"
+	dst8 := "/opt"
+	dst9 := "/var/lib/mysql/mysql/test"
+	mounts := []*Mount{
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst1,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst2,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeA,
+			Destination: &dst2,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst4,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst5,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst8,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeD,
+			Destination: &dst3,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeT,
+			Destination: &dst6,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst9,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst7,
+		},
+		{
+			Source:      &commonSource,
+			Type:        &typeM,
+			Destination: &dst7,
+		},
+	}
+	mountmap := map[string][]*Mount{
+		// *mounts[6].Destination: {mounts[6]},
+	}
+	fmt.Println(&mounts[0])
+	mounts, err = regenMounts(mounts, defaultmounts, mountmap)
+	fmt.Println(&mounts[0])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// fmt.Println(len(mountmap), mountmap)
+	for _, v := range mounts {
+		fmt.Println(*v.Destination, *v.Type)
+	}
+}

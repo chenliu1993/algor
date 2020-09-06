@@ -1,0 +1,7 @@
+#destination mac                                                                                                               DHOSTMAC=00:23:24:44:72:41
+#destination ip
+DHOSTIP=192.168.100.72
+#source  mac
+SHOSTMAC=00:0F:F4:19:78:A9
+#source  ip
+SHOSTIP=192.168.100.1

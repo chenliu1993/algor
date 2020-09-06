@@ -1,0 +1,22 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"syscall"
+)
+
+func main() {
+
+	p, err := os.FindProcess(1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(p)
+	if err := syscall.SetsockoptInt(int(file.Fd()), syscall.SOL_SOCKET, syscall.SO_RCVBUF, 64*1024*1024); err != nil {
+		fmt.Println(err)
+		return
+	}
+	return
+}

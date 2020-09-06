@@ -1,0 +1,198 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"os/exec"
+	"sync/atomic"
+	"syscall"
+	"time"
+)
+
+const (
+	defaultTCPPort   = 2473
+	defaultBufferLen = 100
+	maxBufferLen     = 200
+)
+
+type tcpReader struct {
+	conn   *net.TCPConn
+	closed uintptr
+	peer   *tcpWriter
+}
+
+func (t *tcpReader) Read(p []byte) (int, error) {
+	n, err := t.conn.Read(p[:defaultBufferLen])
+	if err == io.EOF {
+		if atomic.LoadUintptr(&t.closed) != 0 {
+			err = t.peer.realClose()
+			if err != nil {
+				fmt.Println(err)
+			}
+			return 0, io.EOF
+		}
+	}
+	return n, err
+}
+
+func (t *tcpReader) Close() error {
+	return t.conn.Close()
+}
+
+type tcpWriter struct {
+	conn *net.TCPConn
+	peer *tcpReader
+}
+
+func (t *tcpWriter) Write(b []byte) (int, error) {
+	n, err := t.conn.Write(b)
+	if err != nil {
+		err, ok := err.(*net.OpError)
+		if ok {
+			err, ok := err.Err.(*os.SyscallError)
+			if ok {
+				err, ok := err.Err.(syscall.Errno)
+				if ok {
+					if err == syscall.ECONNREFUSED {
+						return len(b), nil
+					}
+				}
+			}
+		}
+	}
+	return n, err
+}
+
+func (t *tcpWriter) Close() error {
+	atomic.StoreUintptr(&t.peer.closed, 1)
+	_, err := t.conn.Write([]byte{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	return t.conn.Close()
+}
+
+func (t *tcpWriter) realClose() error {
+	_, err := t.conn.Write([]byte{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	return t.conn.Close()
+}
+
+func tcpPipe(port int) (*tcpReader, *tcpWriter, error) {
+	read := make(chan *net.TCPConn, 1)
+	write := make(chan *net.TCPConn, 1)
+	var err error
+	addr := net.TCPAddr{
+		Port: port,
+		IP:   net.ParseIP("127.0.0.1"),
+	}
+	readListener, err := net.Listen("tcp", addr.String())
+	if err != nil {
+		return nil, nil, err
+	}
+	go func() {
+		for {
+			readConn, er := readListener.Accept()
+			if err != nil {
+				err = er
+				// continue or stop?
+				break
+			}
+			read <- readConn.(*net.TCPConn)
+			fmt.Println("read connected", readConn.(*net.TCPConn), len(read))
+		}
+	}()
+	go func() {
+		writeConn, err := net.Dial("tcp", addr.String())
+		if err != nil {
+			<-read // nolint: gosec
+		}
+		write <- writeConn.(*net.TCPConn)
+		fmt.Println("write connected", writeConn.(*net.TCPConn), len(write))
+	}()
+
+	time.Sleep(5 * time.Millisecond)
+	reader := &tcpReader{
+		conn: <-read,
+	}
+	writer := &tcpWriter{
+		conn: <-write,
+		peer: reader,
+	}
+	reader.peer = writer
+	return reader, writer, nil
+}
+
+// tcpReadHeartBeat checks the tcp's read function.
+// If the read stuck for timeout seconds then close the conn.
+func tcpReadHeartBeat(c *net.TCPConn, live chan byte, timeout int) {
+CHECK:
+	for {
+		select {
+		case <-live:
+			break CHECK
+		case <-time.After(time.Duration(timeout) * time.Second):
+			c.Close()
+			break CHECK
+		}
+	}
+}
+
+func setReadLive(buffer []byte, flag chan bool, live chan byte) {
+	if <-flag {
+		live <- buffer[0]
+	}
+	close(flag)
+}
+
+func main() {
+	cmd := exec.Command("cat", "CoreFile")
+	r, w, err := os.Pipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rTCP, wTCP, err := tcpPipe(defaultTCPPort)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	cmd.Stdout = w
+	cmd.Stderr = w
+	copyClose := func(r *os.File, w *tcpWriter) {
+		if _, err := io.Copy(w, r); err != nil {
+			fmt.Println("copy error", err)
+		}
+		if err := w.Close(); err != nil {
+			fmt.Println(err)
+		}
+		if err := r.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}
+	go copyClose(r, wTCP)
+	go cmd.Run()
+	buf := make([]byte, maxBufferLen)
+
+	i := 0
+	for {
+		i++
+		time.Sleep(5 * time.Second)
+		live := make(chan byte)
+		bytesCh := make(chan bool, 1)
+		go tcpReadHeartBeat(rTCP.conn, live, 5)
+		go setReadLive(buf, bytesCh, live)
+		n, err := rTCP.Read(buf)
+		bytesCh <- true
+		if err != nil {
+			fmt.Println("read error", err)
+			break
+		}
+		fmt.Println(i, defaultBufferLen, buf[:n])
+	}
+	return
+}

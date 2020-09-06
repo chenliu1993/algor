@@ -1,0 +1,139 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"sync/atomic"
+	"syscall"
+)
+
+type udpReader struct {
+	conn   *net.UDPConn
+	closed uintptr
+	peer   *udpWriter
+}
+
+func (u *udpReader) Read(p []byte) (int, error) {
+	fmt.Println("udpReader Read")
+	n, err := u.conn.Read(p)
+	if err == io.EOF {
+		if atomic.LoadUintptr(&u.closed) != 0 {
+			err = u.peer.realClose()
+			if err != nil {
+				fmt.Errorf("Failed to close UDP writer: ", err)
+			}
+			return 0, io.EOF
+		}
+	}
+	return n, err
+}
+func (u *udpReader) Close() error {
+	fmt.Println("udpReader Close")
+	return u.conn.Close()
+}
+
+type udpWriter struct {
+	conn *net.UDPConn
+	peer *udpReader
+}
+
+func (u *udpWriter) Write(b []byte) (int, error) {
+	fmt.Println("udpWriter Write")
+	n, err := u.conn.Write(b)
+	if err != nil {
+		err, ok := err.(*net.OpError)
+		if ok {
+			err, ok := err.Err.(*os.SyscallError)
+			if ok {
+				err, ok := err.Err.(syscall.Errno)
+				if ok {
+					if err == syscall.ECONNREFUSED {
+						return len(b), nil
+					}
+				}
+			}
+		}
+	}
+	return n, err
+}
+func (u *udpWriter) Close() error {
+	atomic.StoreUintptr(&u.peer.closed, 1)
+	_, err := u.conn.Write([]byte{})
+	if err != nil {
+		fmt.Errorf("Failed to write to UDP sender: ", err)
+	}
+	return u.conn.Close()
+}
+func (u *udpWriter) realClose() error {
+	_, err := u.conn.Write([]byte{})
+	if err != nil {
+		fmt.Errorf("Failed to write to UDP sender: ", err)
+	}
+	return u.conn.Close()
+}
+func udpPipe() (io.ReadCloser, io.WriteCloser, error) {
+	addr := net.UDPAddr{
+		Port: 0,
+		IP:   net.ParseIP("127.0.0.1"),
+	}
+	read, err := net.ListenUDP("udp", &addr)
+	if err != nil {
+		return nil, nil, err
+	}
+	other := read.LocalAddr()
+	local, ok := other.(*net.UDPAddr)
+	if !ok {
+		read.Close() // nolint: gosec
+		return nil, nil, fmt.Errorf("failed to retrieve UDPAddr from %v (%T)", addr, addr)
+	}
+	write, err := net.DialUDP("udp", nil, local)
+	if err != nil {
+		read.Close() // nolint: gosec
+		return nil, nil, err
+	}
+	reader := &udpReader{
+		conn: read,
+	}
+	writer := &udpWriter{
+		conn: write,
+		peer: reader,
+	}
+	reader.peer = writer
+	return reader, writer, nil
+}
+func main() {
+	r, w, err := udpPipe()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	// whole string is 1a2b3c4, we split it to 4 segments
+	w.Write([]byte{'1', 'a'})
+	w.Write([]byte{'2', 'b'})
+	w.Write([]byte{'3', 'c'})
+	w.Write([]byte{'4'})
+	var finalResult = ""
+	result := make([]byte, 2)
+	n, err := r.Read(result)
+	fmt.Printf("read %d\n", n)
+	fmt.Println(string(result))
+	finalResult = finalResult + string(result)
+	result = make([]byte, 2)
+	r.Read(result)
+	fmt.Printf("read %d\n", n)
+	fmt.Println(string(result))
+	finalResult = finalResult + string(result)
+	result = make([]byte, 2)
+	r.Read(result)
+	fmt.Printf("read %d\n", n)
+	fmt.Println(string(result))
+	finalResult = finalResult + string(result)
+	result = make([]byte, 2)
+	r.Read(result)
+	fmt.Printf("read %d\n", n)
+	fmt.Println(string(result))
+	finalResult = finalResult + string(result)
+	fmt.Println("finall result:", finalResult)
+}

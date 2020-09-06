@@ -1,0 +1,228 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"os/exec"
+	"runtime"
+	"sync/atomic"
+	"syscall"
+)
+
+const (
+	maxBufferLen = 100
+)
+
+type udpReader struct {
+	conn   *net.UDPConn
+	closed uintptr
+	peer   *udpWriter
+	count  int64
+}
+
+func (u *udpReader) Read(p []byte) (int, error) {
+	u.count++
+	n, err := u.conn.Read(p)
+	if err == io.EOF {
+		if atomic.LoadUintptr(&u.closed) != 0 {
+			err = u.peer.realClose()
+			if err != nil {
+				fmt.Println(err)
+			}
+			return 0, io.EOF
+		}
+	}
+	return n, err
+}
+
+func (u *udpReader) Close() error {
+	return u.conn.Close()
+}
+
+type udpWriter struct {
+	conn   *net.UDPConn
+	peer   *udpReader
+	counts chan int64
+	count  int64
+	// quit   chan bool
+}
+
+func (u *udpWriter) Write(b []byte) (int, error) {
+	var err error
+	for i := 0; ; i++ {
+		if len(b) < maxBufferLen*(i+1) {
+			if len(b) == maxBufferLen*i {
+				break
+			}
+			_, err = u.conn.Write(b[maxBufferLen*i:])
+			u.count++
+			u.counts <- u.count
+			u.counts <- -1
+			// u.quit <- true
+			break
+		}
+		_, err = u.conn.Write(b[maxBufferLen*i : maxBufferLen*(i+1)])
+		if err != nil {
+			// Something goes wrong here which may lead to write inconsistency, stop write.
+			break
+		}
+		u.count++
+		u.counts <- u.count
+	}
+	if err != nil {
+		errNet, ok := err.(*net.OpError)
+		if ok {
+			errSysCall, ok := errNet.Err.(*os.SyscallError)
+			if ok {
+				errSys, ok := errSysCall.Err.(syscall.Errno)
+				if ok {
+					if errSys == syscall.ECONNREFUSED {
+						if err = u.Close(); err != nil {
+							return len(b), err
+						}
+						return len(b), nil
+					}
+				}
+			}
+		}
+	}
+	return len(b), err
+}
+
+func (u *udpWriter) Close() error {
+	atomic.StoreUintptr(&u.peer.closed, 1)
+	_, err := u.conn.Write([]byte{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	return u.conn.Close()
+}
+
+func (u *udpWriter) realClose() error {
+	_, err := u.conn.Write([]byte{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	return u.conn.Close()
+}
+func udpPipe(port int) (*udpReader, *udpWriter, error) {
+	addr := net.UDPAddr{
+		Port: port,
+		IP:   net.ParseIP("127.0.0.1"),
+	}
+	read, err := net.ListenUDP("udp", &addr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	other := read.LocalAddr()
+	local, ok := other.(*net.UDPAddr)
+	if !ok {
+		read.Close() // nolint: gosec
+		return nil, nil, fmt.Errorf("failed to retrieve UDPAddr from %v (%T)", addr, addr)
+	}
+
+	write, err := net.DialUDP("udp", nil, local)
+	if err != nil {
+		read.Close() // nolint: gosec
+		return nil, nil, err
+	}
+	reader := &udpReader{
+		conn:  read,
+		count: int64(0),
+	}
+	ch := make(chan int64)
+	// quitCh := make(chan bool)
+	writer := &udpWriter{
+		conn:   write,
+		peer:   reader,
+		count:  int64(0),
+		counts: ch,
+		// quit:   quitCh,
+	}
+	reader.peer = writer
+	return reader, writer, nil
+}
+func main() {
+	runtime.SetMutexProfileFraction(1)
+	runtime.SetBlockProfileRate(1)
+	go func() {
+		log.Println(http.ListenAndServe(":8088", nil))
+	}()
+
+	r1, w1, err := os.Pipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	r2, w2, err := os.Pipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	reader1, writer1, err := udpPipe(0)
+	if err != nil {
+		fmt.Println(err)
+	}
+	_, writer2, err := udpPipe(0)
+	if err != nil {
+		fmt.Println(err)
+	}
+	cmd := exec.Command("./hw")
+	cmd.Stdout = w1
+	cmd.Stderr = w2
+	copyClose := func(r *os.File, w io.WriteCloser) {
+		fmt.Println("copy begins")
+		_, err := io.Copy(w, r)
+		fmt.Println("copy ends")
+		if err != nil {
+			fmt.Println("copy error", err)
+		}
+		if err := w.Close(); err != nil {
+			fmt.Println(err)
+		}
+		if err := r.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}
+	go copyClose(r1, writer1)
+	go copyClose(r2, writer2)
+	buf := make([]byte, maxBufferLen)
+	go cmd.Run()
+	for {
+		select {
+		case c := <-reader1.peer.counts:
+			if reader1.count < c {
+				n, err := reader1.Read(buf)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(n, string(buf[:n]))
+				if n == 0 {
+					return
+				}
+			} else if c == -1 {
+				fmt.Println("done no data")
+				return
+			}
+			// case <-reader1.peer.quit:
+			// 	fmt.Println("done quit")
+			// 	return
+		}
+
+		// if i == 1 {
+		// 	re, ok := cmd.Stdout.(io.WriteCloser)
+		// 	if !ok {
+		// 		fmt.Println("error")
+		// 	}
+		// 	re.Close()
+		// 	cmd.Stdout = nil
+		// 	// r1.Close()
+		// }
+	}
+	return
+}

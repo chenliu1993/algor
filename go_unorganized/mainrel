@@ -1,0 +1,54 @@
+package main
+
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+)
+
+func main() {
+	dst := "Users/cliu2/Documents/gopath/src/"
+	src := "Users/cliu2"
+	if checkFilepathForm(src) == checkFilepathForm(dst) {
+		fmt.Println("same")
+	} else {
+		fmt.Println("diff")
+	}
+	rel, err := filepath.Rel(src, dst)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// src == dst => "."
+	// src is the parent of dst => rel should not contain "..".
+	// src is the child of dst => rel should only contains "..".
+
+	if checkParentHelper(rel) {
+		fmt.Println(rel)
+	}
+	return
+}
+
+func checkFilepathForm(p1 string) bool {
+	if p1[0] == filepath.Separator {
+		return true
+	}
+	return false
+}
+func checkParentHelper(relapath string) bool {
+	if relapath == "." {
+		return true
+	}
+	if !strings.Contains(relapath, "..") {
+		return true
+	}
+	relapath = strings.ReplaceAll(relapath, string(filepath.Separator), "")
+	if len(relapath)%2 != 0 {
+		return false
+	}
+	relapath = strings.ReplaceAll(relapath, "..", "")
+	if len(relapath) != 0 {
+		return false
+	}
+	return true
+}

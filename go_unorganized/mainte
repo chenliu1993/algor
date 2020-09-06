@@ -1,0 +1,31 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	i := 0
+	bytesReadCh := make(chan int)
+	defer close(bytesReadCh)
+	go func() {
+		time.Sleep(5 * time.Second)
+		bytesReadCh <- 5
+	}()
+LOOP:
+	for {
+		i++
+		select {
+		case <-time.Tick(2 * time.Second):
+			fmt.Println("wait too long")
+			break LOOP
+		case bytesR := <-bytesReadCh:
+			fmt.Println(bytesR)
+			break LOOP
+
+		}
+	}
+	fmt.Println("done", i)
+	return
+}

@@ -1,0 +1,28 @@
+package main
+
+import (
+	"flag"
+	"time"
+
+	"github.com/golang/glog"
+)
+
+func main() {
+	flag.Set("log_dir", "log")
+	// flag.Set("alsologtostderr", "true")
+	flag.Parse()
+	go func() {
+		time.Sleep(1 * time.Second)
+		glog.Flush()
+	}()
+
+	for {
+		glog.Info("This is info message")
+		glog.Infof("This is info message: %v", 12345)
+		glog.InfoDepth(1, "This is info message", 12345)
+		glog.Warning("This is warning message")
+		glog.Warningf("This is warning message: %v", 12345)
+		glog.WarningDepth(1, "This is warning message", 12345)
+	}
+
+}

@@ -1,0 +1,63 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+)
+
+func copyBuf(dst, src *os.File, buf []byte) (written int64, err error) {
+	for {
+		nr, er := src.Read(buf)
+		fmt.Println("Read: ", nr)
+		if nr > 0 {
+			nw, ew := dst.Write(buf[0:nr])
+			if nw > 0 {
+				fmt.Println("Write: ", nw)
+				written += int64(nw)
+			}
+			if ew != nil {
+				fmt.Println("ew: ", ew)
+				err = ew
+				break
+			}
+			if nr != nw {
+				err = fmt.Errorf("short write")
+				break
+			}
+		}
+		if er != nil {
+			if er != io.EOF {
+				fmt.Println("eof")
+				err = er
+			}
+			break
+		}
+	}
+	return written, err
+}
+
+func main() {
+	r, w, err := os.Pipe()
+	if err != nil {
+		fmt.Println("Pipe error: ", err)
+	}
+	cmd := exec.Command("./hw")
+	cmd.Stdout = w
+	buf := make([]byte, 1024)
+	f, err := os.OpenFile("./result", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	defer f.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	go cmd.Run()
+	bs, err := copyBuf(f, r, buf)
+	if err != nil {
+		fmt.Println("copyBuf: ", err)
+		return
+	}
+	fmt.Println(bs)
+	return
+}

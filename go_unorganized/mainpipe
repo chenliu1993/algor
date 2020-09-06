@@ -1,0 +1,169 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"os/exec"
+	"runtime"
+	"sync"
+)
+
+const (
+	maxBufferLen = 100
+)
+
+// A pipe that will be activated on first read, until then it will merely drop
+// all writes.
+type rpipe struct {
+	io.ReadCloser
+	lock   *sync.RWMutex
+	active *bool
+}
+
+// Activate the pipe.
+func (p *rpipe) activate() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	*p.active = true
+}
+
+// Deactivate the pipe (after reading is concluded).
+func (p *rpipe) deactivate() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	*p.active = false
+}
+
+type wpipe struct {
+	io.WriteCloser
+	lock   *sync.RWMutex
+	active *bool
+}
+
+// Write to the write part of a pipe. Writes will be dropped if the pipe is not
+// "active".
+func (p *wpipe) Write(b []byte) (int, error) {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	if !*p.active {
+		// do not make copy break.
+		return len(b), nil
+	}
+	return p.WriteCloser.Write(b)
+}
+
+// activator is a helper struct exposing the underlying rpipe's deactivation
+// functionality behind the standard Close method.
+type activator struct {
+	*rpipe
+}
+
+// newActivator creates a new activator.
+func newActivator(pipe *rpipe) *activator {
+	pipe.activate()
+	return &activator{rpipe: pipe}
+}
+
+// Close deactivates the underlying pipe.
+func (p *activator) Close() error {
+	p.rpipe.deactivate()
+	return nil
+}
+
+// newCondPipe creates a pipe that can be activated on demand. If not
+// activated, it will merely drop writes instead of buffering them.
+func newCondPipe() (*rpipe, *wpipe, error) {
+	active := true
+	r, w, err := os.Pipe()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Initialize reader and writer end of the pipe with data shared between
+	// them.
+	var lock sync.RWMutex
+	rp := &rpipe{ReadCloser: r, lock: &lock, active: &active}
+	wp := &wpipe{WriteCloser: w, lock: &lock, active: &active}
+	return rp, wp, nil
+}
+
+func main() {
+	runtime.SetMutexProfileFraction(1)
+	runtime.SetBlockProfileRate(1)
+	go func() {
+		log.Println(http.ListenAndServe(":8088", nil))
+	}()
+
+	i := 0
+	r1, w1, err := os.Pipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	r2, w2, err := os.Pipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	reader1, writer1, err := newCondPipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	_, writer2, err := newCondPipe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	cmd := exec.Command("./hw")
+	cmd.Stdout = w1
+	cmd.Stderr = w2
+	copyClose := func(r *os.File, w io.WriteCloser) {
+		fmt.Println("copy begins")
+		_, err := io.Copy(w, r)
+		fmt.Println("copy ends")
+		if err != nil {
+			fmt.Println("copy error", err)
+		}
+		if err := w.Close(); err != nil {
+			fmt.Println(err)
+		}
+		if err := r.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}
+	go copyClose(r1, writer1)
+	go copyClose(r2, writer2)
+	buf := make([]byte, maxBufferLen)
+	closeDupStds := func(cmd *exec.Cmd) {
+		re, ok := cmd.Stdout.(io.WriteCloser)
+		if !ok {
+			fmt.Println("error")
+		}
+		re.Close()
+		cmd.Stdout = nil
+	}
+	go func() {
+		defer closeDupStds(cmd)
+		if err := cmd.Run(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	// go cmd.Run()
+	for {
+		i++
+		n, err := reader1.Read(buf)
+		if err != nil {
+			fmt.Println("here", err)
+			break
+		}
+		fmt.Println(i, n, string(buf[:n]))
+		if n == 0 {
+			break
+		}
+	}
+	return
+}

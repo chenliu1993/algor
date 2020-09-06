@@ -1,0 +1,141 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+const (
+	// MaxWorkers is the size of pool.
+	MaxWorkers = 10
+	// MaxJobs is the job queue size.
+	MaxJobs = 100
+)
+
+var (
+	// Pool is the real job sender.
+	Pool StreamPool
+	// wg is the wait group.
+	wg sync.WaitGroup
+)
+
+// RealJob is the realization of Job.
+type RealJob struct{}
+
+// StreamWorker will run the io ops.
+type StreamWorker struct {
+	id   int
+	job  JobCh
+	quit chan bool
+}
+
+// JobCh is the channel for job
+type JobCh chan RealJob
+
+// WorkCh is the channel for worker.
+type WorkCh chan JobCh
+
+// StreamPool holds all workers.
+type StreamPool struct {
+	WorkerQ WorkCh
+	JobQ    JobCh
+	Wch     chan StreamWorker
+	quit    chan bool
+}
+
+// Do does the job content.
+func (r *RealJob) Do(i int) {
+	fmt.Println("Doing Job", i)
+}
+
+// Start starts th worker.
+func (s *StreamWorker) Start() {
+	go func() {
+		Pool.WorkerQ <- s.job
+		for {
+			select {
+			case <-s.quit:
+				return
+			case j := <-s.job:
+				j.Do(s.id)
+				Pool.WorkerQ <- s.job
+			}
+		}
+	}()
+}
+
+// Stop stops the worker.
+func (s *StreamWorker) Stop() {
+	go func() {
+		s.quit <- true
+	}()
+}
+
+// NewStreamWorker new a StreamWorker for use.
+func NewStreamWorker(i int) StreamWorker {
+	newStreamWorker := StreamWorker{
+		id: i,
+	}
+	newStreamWorker.job = make(JobCh)
+	newStreamWorker.quit = make(chan bool)
+	return newStreamWorker
+}
+
+// NewStreamPool new a pool.
+func NewStreamPool() StreamPool {
+	pool := StreamPool{}
+	pool.Wch = make(chan StreamWorker, MaxWorkers)
+	pool.WorkerQ = make(WorkCh, MaxWorkers)
+	pool.JobQ = make(JobCh, MaxJobs)
+	pool.quit = make(chan bool)
+	return pool
+}
+
+// Run does the worker sent.
+func (p *StreamPool) Run() {
+	for i := 0; i < MaxWorkers; i++ {
+		w := NewStreamWorker(i)
+		w.Start()
+		p.Wch <- w
+	}
+}
+
+// Stop stops the pool.
+func (p *StreamPool) Stop() {
+	for i := 0; i < MaxWorkers; i++ {
+		w := <-p.Wch
+		w.Stop()
+	}
+	p.quit <- true
+}
+
+func main() {
+	n := 0
+	Pool = NewStreamPool()
+	Pool.Run()
+	for i := 0; i < MaxJobs; i++ {
+		Pool.JobQ <- RealJob{}
+	}
+	go func(num *int) {
+		for {
+			if *num == MaxJobs {
+				Pool.Stop()
+			}
+		}
+	}(&n)
+LOOP:
+	for {
+		select {
+		case j := <-Pool.JobQ:
+			n++
+			go func(job RealJob) {
+				wCh := <-Pool.WorkerQ
+				wCh <- job
+			}(j)
+		case <-Pool.quit:
+			break LOOP
+		}
+	}
+	fmt.Println("Pool done")
+	return
+}
