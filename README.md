@@ -1,1 +1,1 @@
-### JUST TEST ###
+### JUST FOR SELF-LEARNING ###

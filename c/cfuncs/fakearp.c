@@ -133,7 +133,8 @@ parse_args(u_int32_t argc,u_int8_t **argv)
                                                                                                                                                                                                                                                                                          
 int main(u_int32_t argc, u_int8_t **argv)
 {
-       u_int8_t   count = 0;       count = parse_args(argc,argv);
+       u_int8_t   count = 0;       
+       count = parse_args(argc,argv);
        if(count != 2)
        {
                printf("Please input the arp_file!!!!\n");

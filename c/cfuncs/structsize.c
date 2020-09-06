@@ -15,6 +15,6 @@ typedef struct _TestStruct {
 
 int
 main(int argc, char *argv[]) {
-    printf("the size of stuct is %d, the align is %d\n", sizeof(TestStruct), __alignof__(TestStruct));
+    printf("the size of stuct is %lu, the align is %lu\n", sizeof(TestStruct), __alignof__(TestStruct));
     return 0;
 }
