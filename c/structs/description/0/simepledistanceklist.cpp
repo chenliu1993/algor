@@ -5,6 +5,7 @@
 typedef struct _ListNode {
     int  val;
     struct _ListNode *next;
+    _ListNode(int a): val(a), next(NULL) {}
 } ListNode;
 
 ListNode *
