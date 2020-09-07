@@ -3,7 +3,7 @@
 #define arraysize(a) \
     (sizeof(a)/sizeof*(a))
 typedef struct _ListNode {
-    int  val;
+    int val;
     struct _ListNode *next;
     _ListNode(int a): val(a), next(NULL) {}
 } ListNode;
