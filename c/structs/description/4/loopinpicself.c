@@ -6,6 +6,16 @@
 int g[VertexNum][VertexNum];
 int Visited[VertexNum];
 
+
+void
+printArrary(){
+    for(int i=0;i<VertexNum;i++) {
+        for(int j=0;j<VertexNum;j++) {
+            printf("%d,",g[i][j]);
+        }
+        printf("\n");
+    }
+}
 void
 checkLoop() {
     // init pic
@@ -22,6 +32,7 @@ checkLoop() {
             g[i][j]=c;
         }
     }
+    printArrary(g);
     // check
     int single=1, isLoop=1;
     for(int n=0;n<VertexNum;n++) {
@@ -54,4 +65,10 @@ checkLoop() {
     if(isLoop) {
         printf("loop\n");
     }
+}
+
+int
+main(int argc, char *argv[]){
+    checkLoop();
+    return 0;
 }
