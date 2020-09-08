@@ -63,6 +63,8 @@ checkLoop() {
         }
     }
     if(isLoop) {
+        printf("no loop\n");
+    }else{
         printf("loop\n");
     }
 }
