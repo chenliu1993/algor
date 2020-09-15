@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	cmd := exec.Command("./hw")
+	cmd := exec.Command("./log_test")
 	cmd.Stdout = w1
 	cmd.Stderr = w2
 	copyClose := func(r *os.File, w io.WriteCloser) {
