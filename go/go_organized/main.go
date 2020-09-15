@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"time"
+	"sync"
 
 	"github.com/chenliu1993/algor/go/go_organized/utils"
 )
@@ -54,10 +54,10 @@ func main() {
 	go copyClose(r2, writer2)
 	buf := make([]byte, utils.MaxBufferLen)
 	go cmd.Run()
-	// var wg sync.WaitGroup
-	// wg.Add(1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
-		// defer wg.Done()
+		defer wg.Done()
 		for {
 			tempReader := utils.Read(reader1)
 			if tempReader == nil {
@@ -72,7 +72,6 @@ func main() {
 			fmt.Println(string(buf[:n]))
 		}
 	}()
-	// wg.Wait()
-	time.Sleep(10 * time.Second)
+	wg.Wait()
 	return
 }
