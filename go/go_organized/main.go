@@ -37,8 +37,10 @@ func main() {
 	cmd.Stdout = w1
 	cmd.Stderr = w2
 	copyClose := func(r *os.File, w io.WriteCloser) {
+		p := utils.BufPool.Get().(*[]byte)
+		defer utils.BufPool.Put(p)
 		fmt.Println("copy begins")
-		_, err := io.Copy(w, r)
+		_, err := io.CopyBuffer(w, r, *p)
 		fmt.Println("copy ends")
 		if err != nil {
 			fmt.Println("copy error", err)

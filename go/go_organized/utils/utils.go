@@ -6,6 +6,7 @@ import (
 	"net"
 	_ "net/http/pprof"
 	"os"
+	"sync"
 	"sync/atomic"
 	"syscall"
 )
@@ -13,6 +14,14 @@ import (
 const (
 	MaxBufferLen = 100
 )
+
+var BufPool = sync.Pool{
+	New: func() interface{} {
+		// TODO support unlinited buffer
+		buffer := make([]byte, 10*1024*1024)
+		return &buffer
+	},
+}
 
 type udpReader struct {
 	conn   *net.UDPConn
@@ -50,6 +59,7 @@ type udpWriter struct {
 
 func (u *udpWriter) Write(b []byte) (int, error) {
 	var err error
+	fmt.Println("here", len(b))
 	for i := 0; ; i++ {
 		if len(b) < MaxBufferLen*(i+1) {
 			if len(b) == MaxBufferLen*i {
@@ -59,7 +69,6 @@ func (u *udpWriter) Write(b []byte) (int, error) {
 			u.Count++
 			u.Counts <- u.Count
 			u.Counts <- -1
-			// u.quit <- true
 			break
 		}
 		_, err = u.conn.Write(b[MaxBufferLen*i : MaxBufferLen*(i+1)])
@@ -115,7 +124,9 @@ func UdpjobPipe(port int) (*udpReader, *udpWriter, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-
+	if err := read.SetReadBuffer(1024 * 1024); err != nil {
+		return nil, nil, err
+	}
 	other := read.LocalAddr()
 	local, ok := other.(*net.UDPAddr)
 	if !ok {
@@ -152,11 +163,13 @@ LOOP:
 		select {
 		case c := <-r.Peer.Counts:
 			if c == -1 {
+				fmt.Println("here1")
 				return nil
 			}
 			if r.Count < c {
 				break LOOP
 			} else {
+				fmt.Println("here2")
 				return nil
 			}
 		}
