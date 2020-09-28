@@ -15,8 +15,8 @@ GCD(unsigned int a, unsigned int b)
 
 int main(int argc, char *argv[])
 {
-    unsigned int a = 4;
-    unsigned int b = 16;
+    unsigned int a = 50;
+    unsigned int b = 15;
     printf("%u and %u's gcd is %u", a, b, GCD(a, b));
     return 0;
 }
