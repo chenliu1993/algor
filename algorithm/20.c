@@ -34,7 +34,7 @@ int isValid(char *s)
         }
         else
         {
-            if (top == 0 || s[top - 1] != another(s[i]))
+            if (top == 0 || rc[top - 1] != another(s[i]))
             {
                 return 0;
             }
