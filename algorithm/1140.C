@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//dp[i][j]代表第i堆石子，M为j时先手取石子所能获得的最大石子数量
 int stoneGameII(int *piles, int n)
 {
     int i, x, m, dp[110][110] = {0}, sum = 0;
