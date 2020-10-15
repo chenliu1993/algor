@@ -28,6 +28,6 @@ double myPow(double x, int n)
 
 int main(int argc, char *argv[])
 {
-    printf("%f\n", myPow(1, INT_));
+    printf("%f\n", myPow(1, INT_MIN));
     return 0;
 }
