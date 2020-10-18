@@ -6,53 +6,78 @@ struct ListNode
     int val;
     struct ListNode *next;
 };
-// struct ListNode *removeNthFromEnd(struct ListNode *head, int n)
-// {
-//     struct ListNode *h = head, *ptr1 = head, *ptr2, *ptr3, *temp;
-//     int count = 0;
-//     ptr2 = ptr1->next;
-//     ptr3 = head;
-//     while (ptr3 != NULL)
-//     {
-//         ptr3 = ptr3->next;
-//         count++;
-//     }
-//     n = count - n;
-//     while (n)
-//     {
-//         ptr2 = ptr1;
-//         ptr1 = ptr1->next;
-//         n--;
-//     }
-//     temp = ptr1->next;
-//     ptr2->next = temp;
-//     ptr1->next = NULL;
-//     return h;
-// }
+
+struct ListNode *initList(int *a, int asize)
+{
+    struct ListNode *head = (struct ListNode *)malloc(sizeof(struct ListNode));
+    head->val = a[0];
+    head->next = NULL;
+    struct ListNode *ptr = head;
+    for (int i = 1; i < asize; i++)
+    {
+        struct ListNode *p = (struct ListNode *)malloc(sizeof(struct ListNode));
+        p->val = a[i];
+        p->next = NULL;
+        ptr->next = p;
+        ptr = p;
+    }
+    return head;
+}
+
+void printList(struct ListNode *h)
+{
+    while (h != NULL)
+    {
+        printf("%d,", h->val);
+        h = h->next;
+    }
+    printf("\n");
+}
+struct Stack
+{
+    struct ListNode *val;
+    struct Stack *next;
+};
 struct ListNode *removeNthFromEnd(struct ListNode *head, int n)
 {
-    struct ListNode *ptr1 = head, *ptr2, *h;
+    struct ListNode *ptr1, *h;
     h = (struct ListNode *)malloc(sizeof(struct ListNode));
     h->val = 0;
     h->next = head;
-    int rear = 0;
-    struct ListNode *stack = (struct ListNode *)calloc(1000, sizeof(struct ListNode));
+    ptr1 = h;
+    struct Stack *stack = NULL;
     while (ptr1 != NULL)
     {
-        stack[rear++] = *ptr1;
+        struct Stack *tmp = (struct Stack *)malloc(sizeof(struct Stack));
+        tmp->val = ptr1;
+        tmp->next = stack;
+        stack = tmp;
         ptr1 = ptr1->next;
     }
-    rear--;
     while (n)
     {
         n--;
-        rear--;
+        struct Stack *tmp = stack->next;
+        free(stack);
+        stack = tmp;
     }
-    ptr1 = &stack[--rear];
-    ptr1->next = ptr1->next->next;
+    struct ListNode *prev = stack->val;
+    prev->next = prev->next->next;
     struct ListNode *ans = h->next;
     free(h);
     return ans;
+}
+
+int main(int argc, char *argv[])
+{
+    int a[5] = {1, 2, 3, 4, 5};
+    struct ListNode *head = initList(a, 5);
+    printList(head);
+
+    struct ListNode *rc = removeNthFromEnd(head, 2);
+
+    printList(rc);
+    return 0;
 }
 // struct ListNode *removeNthFromEnd(struct ListNode *head, int n)
 // {
