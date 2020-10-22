@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/chenliu1993/algor/go/go_organized/utils"
+	"time"
 )
 
 func main() {
-	fmt.Println(utils.GetDiskName(52))
-	return
+	for {
+		select {
+		case <-time.After(5 * time.Second):
+			fmt.Println("5 sec passed")
+		default:
+			time.Sleep(10 * time.Second)
+			fmt.Println("10 sec passed")
+		}
+	}
 }
