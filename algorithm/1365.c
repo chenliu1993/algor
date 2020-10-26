@@ -76,39 +76,73 @@ void qicksort(int *nums, int numsSize)
 //     return rc;
 // }
 
+int cmp(const void *a, const void *b)
+{
+    return ((*(int **)a)[0] - (*(int **)b)[0]);
+}
+
 int *smallerNumbersThanCurrent(int *nums, int numsSize, int *returnSize)
 {
-    if (numsSize == 0 || nums == NULL)
+    int *data[numsSize];
+    for (int i = 0; i < numsSize; i++)
     {
-        return nums;
+        data[i] = malloc(sizeof(int) * 2);
+        data[i][0] = nums[i], data[i][1] = i;
     }
+    qsort(data, numsSize, sizeof(int *), cmp);
+
+    int *ret = malloc(sizeof(int) * numsSize);
     *returnSize = numsSize;
-    if (numsSize == 1)
-    {
-        int *rc = (int *)calloc(1, sizeof(int));
-        return rc;
-    }
-    int *rc = (int *)calloc(numsSize, sizeof(int));
-    int **data = (int **)malloc(numsSize * sizeof(int *));
+    int prev = -1;
     for (int i = 0; i < numsSize; i++)
     {
-        data[i] = (int *)malloc(2 * sizeof(int));
-        memset(data[i], 0, 2 * sizeof(int));
-        data[i][0] = nums[i];
-        data[i][1] = i;
-    }
-    qicksort(nums, numsSize);
-    int smaller = -1;
-    for (int i = 0; i < numsSize; i++)
-    {
-        if (smaller == -1 || data[i][0] != data[i - 1][0])
+        if (prev == -1 || data[i][0] != data[i - 1][0])
         {
-            smaller = i;
+            prev = i;
         }
-        rc[data[i][1]] = smaller;
+        ret[data[i][1]] = prev;
     }
-    return rc;
+    return ret;
 }
+
+// int *smallerNumbersThanCurrent(int *nums, int numsSize, int *returnSize)
+// {
+//     if (numsSize == 0 || nums == NULL)
+//     {
+//         return nums;
+//     }
+//     *returnSize = numsSize;
+//     if (numsSize == 1)
+//     {
+//         int *rc = (int *)calloc(1, sizeof(int));
+//         return rc;
+//     }
+//     int *rc = (int *)calloc(numsSize, sizeof(int));
+//     int **data = (int **)malloc(numsSize * sizeof(int *));
+//     for (int i = 0; i < numsSize; i++)
+//     {
+//         data[i] = (int *)malloc(2 * sizeof(int));
+//         memset(data[i], 0, 2 * sizeof(int));
+//         data[i][0] = nums[i];
+//         data[i][1] = i;
+//     }
+//     qicksort(nums, numsSize);
+//     int oldnum = nums[0], oldidx;
+//     for (int i = 0; i < numsSize; i++)
+//     {
+//         if (oldnum != nums[i])
+//         {
+//             oldnum = nums[i];
+//             oldidx = i;
+//             rc[data[i][1]] = i;
+//         }
+//         else
+//         {
+//             rc[data[i][1]] = oldidx;
+//         }
+//     }
+//     return rc;
+// }
 void printArray(int *a, int asize)
 {
 
