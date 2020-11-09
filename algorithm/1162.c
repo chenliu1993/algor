@@ -42,6 +42,7 @@ int maxDistance(int **grid, int gridSize, int *gridColSize)
     {
         for (int j = 0; j < n; j++)
         {
+            // Here already make sure queue[0] is a '1'
             if (grid[i][j] == 1)
             {
                 visited[i][j] = 1;
