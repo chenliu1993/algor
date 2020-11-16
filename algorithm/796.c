@@ -12,6 +12,10 @@ int rotateString(char *A, char *B)
     {
         return 0;
     }
+    if (alen == 0)
+    {
+        return 1;
+    }
     if (alen == 1)
     {
         if (A[0] == B[0])
