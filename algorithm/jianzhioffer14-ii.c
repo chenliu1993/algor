@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <math.h>
+// https : //leetcode-cn.com/problems/jian-sheng-zi-lcof/solution/ji-suan-fa-by-jason-2/
 int cuttingRope(int n)
 {
     if (n <= 3)
