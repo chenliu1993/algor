@@ -25,7 +25,7 @@ void dfs(struct TreeNode *root, int sum, int *returnSize, int **returnColumnSize
         if (!sum)
         {
             rc[*returnSize] = (int *)malloc(sizeof(int) * pathTop);
-            memcpy(rc[*returnSize], pathTop, sizeof(int) * pathTop);
+            memcpy(rc[*returnSize], currentPath, sizeof(int) * pathTop);
             (*returnColumnSizes)[*returnSize] = pathTop;
             (*returnSize)++;
         }
