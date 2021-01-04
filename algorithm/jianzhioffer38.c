@@ -23,6 +23,7 @@ void DFS(char *s, int slen, int count, int *visited, char **rc, char *ele)
 {
     if (count == slen)
     {
+        rc = realloc(rc, (rear + 1) * sizeof(char *));
         rc[rear] = (char *)malloc(slen * sizeof(char));
         memcpy(rc[rear++], ele, slen * sizeof(char));
         return;
@@ -54,7 +55,7 @@ char **permutation(char *s, int *returnSize)
         sum *= i;
     }
     int *visited = (int *)calloc(slen, sizeof(int));
-    char **rc = (char **)malloc(sum * sizeof(char *));
+    char **rc = (char **)malloc(0);
 
     char *ele = (char *)malloc(slen * sizeof(char));
     rear = 0;
@@ -67,7 +68,8 @@ int main(int argc, char *argv[])
 {
     char s[4] = "abc\0";
     int *returnSize = (int *)calloc(1, sizeof(int));
-    char **rc = permutation(s, returnSize);
-    printGrid(rc, *returnSize, 3);
+    permutation(s, returnSize);
+    // char **rc = permutation(s, returnSize);
+    // printGrid(rc, *returnSize, 3);
     return 0;
 }
