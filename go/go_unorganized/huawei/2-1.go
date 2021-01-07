@@ -68,14 +68,15 @@ func calSum(inputs []string) int {
 		p1Val, _ := strconv.Atoi(p1)
 		p2Val, _ := strconv.Atoi(p2)
 		stk[rear-1] = strconv.Itoa(calculate(op, p1Val, p2Val))
+		fmt.Println(stk)
 	}
-	res, _ := strconv.Atoi(stk[len(stk)-1])
+	res, _ := strconv.Atoi(stk[0])
 	return res
 }
 
 func main() {
 	var input string
-	input = "(sub mul 2 4 2)"
+	input = "(sub 2 mul 2 4)"
 	vals := strings.Split(input, " ")
 	for idx := range vals {
 		if strings.Compare(string(vals[idx][0]), "(") == 0 {
