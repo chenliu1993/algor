@@ -21,6 +21,7 @@ int compareFunc(const void *a, const void *b)
 int *sequentialDigits(int low, int high, int *returnSize)
 {
     int *res = malloc(0);
+    (*returnSize) = 0;
     for (int i = 1; i <= 9; i++)
     {
         int num = i;
