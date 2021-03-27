@@ -1,7 +1,5 @@
 package algor
 
-import "fmt"
-
 // // let us just waste space for now......
 // func insertEleMin(heap []int, target int) []int {
 // 	n := len(heap)
@@ -84,15 +82,20 @@ import "fmt"
 
 func minHeap(root int, end int, c []int) {
 	for {
+		// get left child.
+		// the pos of chilren is defined by position, not index in the slice, thus add 1.
 		var child = 2*root + 1
-		//判断是否存在child节点
+		// check if left child exists.
 		if child > end {
 			break
 		}
-		//判断右child是否存在，如果存在则和另外一个同级节点进行比较
+		// check if right child exists.
+		// if exists, then get the minial one between left and right.
 		if child+1 <= end && c[child] > c[child+1] {
 			child += 1
 		}
+		// switch place.
+		// down-percolate.
 		if c[root] > c[child] {
 			c[root], c[child] = c[child], c[root]
 			root = child
@@ -102,13 +105,13 @@ func minHeap(root int, end int, c []int) {
 	}
 }
 
-//降序排序
 func HeapSort(c []int) {
 	var n = len(c) - 1
+	// from the root point.
 	for root := n / 2; root >= 0; root-- {
 		minHeap(root, n, c)
 	}
-	fmt.Println("堆构建完成")
+
 	for end := n; end >= 0; end-- {
 		if c[0] < c[end] {
 			c[0], c[end] = c[end], c[0]
