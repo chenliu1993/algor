@@ -74,7 +74,7 @@ func calSum(inputs []string) int {
 	return res
 }
 
-func main() {
+func main1() {
 	var input string
 	input = "(sub 2 mul 2 4)"
 	vals := strings.Split(input, " ")
