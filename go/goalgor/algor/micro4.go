@@ -11,7 +11,7 @@ func sqrt(input int64) (result int64) {
 	if input == 0 {
 		result = 0
 	}
-	for limit = input/2 + 1; limit >= 1; limit = limit - 1 {
+	for limit = input/2 + 1; limit >= 1; limit = limit / 2 {
 		if limit*limit-input > 0 && (limit-1)*(limit-1)-input <= 0 {
 			result = limit - 1
 		}
