@@ -45,5 +45,27 @@ func pathSum(root *TreeNode, targetSum int) int {
 	return ans
 }
 
+//  func pathSum(root *TreeNode, targetSum int) int {
+//     var (
+//         count int = 0
+//         prefixSum map[int]int = map[int]int{0:1}
+//         subPathSum func(*TreeNode, int)
+//     )
+//     subPathSum = func(root *TreeNode, cur int) {
+//         if root == nil {
+//             return
+//         }
+//         cur = cur + root.Val
+//         count = count + prefixSum[cur-targetSum]
+
+//         prefixSum[cur]++
+//         subPathSum(root.Left, cur)
+//         subPathSum(root.Right, cur)
+//         prefixSum[cur]--
+//     }
+//     subPathSum(root,0)
+//     return count
+// }
+
 // @lc code=end
 
