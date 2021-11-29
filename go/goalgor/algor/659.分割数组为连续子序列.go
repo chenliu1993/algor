@@ -1,7 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=659 lang=golang
+ *
+ * [659] 分割数组为连续子序列
+ */
 
-import "fmt"
-
+// @lc code=start
 func isPossible(nums []int) bool {
 	n := len(nums)
 	var (
@@ -54,15 +57,6 @@ func isPossible(nums []int) bool {
 	}
 	return len(resultStk) >= 3
 }
-func main() {
-	nums := []int{1, 2, 3, 3, 4, 5}
-	// equations := [][]string{{"a", "c"}, {"b", "e"}, {"c", "d"}, {"e", "d"}}
-	// values := []float64{2.0, 3.0, 0.5, 5.0}
-	// queries := [][]string{{"a", "b"}}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(isPossible(nums))
-}
+
+// @lc code=end
+
