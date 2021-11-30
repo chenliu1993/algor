@@ -1,8 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=845 lang=golang
+ *
+ * [845] 数组中的最长山脉
+ */
 
-import (
-	"fmt"
-)
+// @lc code=start
 
 func Max(i, j int) int {
 	if i < j {
@@ -71,12 +73,6 @@ func longestMountain(arr []int) int {
 	}
 	return maxLen
 }
-func main() {
-	arr := []int{0, 1, 2, 3, 4, 5}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(longestMountain(arr))
-}
+
+// @lc code=end
+
