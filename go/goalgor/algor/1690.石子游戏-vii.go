@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=1690 lang=golang
+ *
+ * [1690] 石子游戏 VII
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func Max(x, y int) int {
 	if x < y {
 		return y
@@ -40,12 +41,6 @@ func stoneGameVII(stones []int) int {
 
 	return record[0][n-1]
 }
-func main() {
-	stones := []int{5, 3, 1, 4, 2}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(stoneGameVII(stones))
-}
+
+// @lc code=end
+
