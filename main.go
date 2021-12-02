@@ -2,81 +2,62 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
-func Max(i, j int) int {
-	if i < j {
-		return j
+func removeComments(source []string) []string {
+	sum := ""
+	stk := ""
+	ans := []string{}
+	for i := 0; i < len(source); i++ {
+		sum = sum + "##" + source[i]
 	}
-	return i
-}
-
-func longestMountain(arr []int) int {
-	n := len(arr)
-	if n < 3 {
-		return 0
-	}
-	var (
-		left     []int
-		right    []int
-		leftIdx  int
-		rightIdx int
-		maxLen   int
-	)
-	maxLen = 0
-	for i := 1; i < n-1; i++ {
-		left = []int{}
-		leftIdx = -1
-		rightIdx = -1
-		right = []int{}
-		for l := i; l >= 0; l-- {
-			for len(left) != 0 && arr[left[len(left)-1]] <= arr[l] {
-				if leftIdx == -1 {
-					leftIdx = left[len(left)-1]
-					l = 0
-					break
-				}
-				left = left[:len(left)-1]
+	sum = strings.TrimPrefix(sum, "##")
+	sum = sum + "##"
+	fmt.Println(sum)
+	for i := 0; i < len(sum); i++ {
+		if sum[i] == '/' {
+			if sum[i+1] == '*' {
+				i = strings.Index(sum[i+2:], "*/") + 3 + i
+			} else if sum[i+1] == '/' {
+				i = strings.Index(sum[i+2:], "##") + 1 + i
+			} else {
+				stk = stk + string(sum[i])
 			}
-			left = append(left, l)
+		} else {
+			stk = stk + string(sum[i])
 		}
-		if leftIdx == i {
+	}
+	fmt.Println(stk)
+	for strings.Contains(stk, "##") {
+		idx := strings.Index(stk, "##")
+		if idx == 0 {
+			stk = stk[idx+2:]
 			continue
 		}
-		if leftIdx == -1 {
-			leftIdx = 0
-		}
-
-		for r := i; r < n; r++ {
-			for len(right) != 0 && arr[right[len(right)-1]] <= arr[r] {
-				if rightIdx == -1 {
-					rightIdx = right[len(right)-1]
-				}
-				r = n - 1
-				right = right[:len(right)-1]
-				break
-			}
-			right = append(right, r)
-		}
-		if rightIdx == i {
-			continue
-		}
-		if rightIdx == -1 {
-			rightIdx = n - 1
-		}
-		maxLen = Max(maxLen, rightIdx-leftIdx+1)
+		ans = append(ans, stk[:idx])
+		stk = stk[idx+2:]
 	}
-	if maxLen < 3 {
-		maxLen = 0
+	if len(stk) != 0 {
+		ans = append(ans, stk)
 	}
-	return maxLen
+	return ans
 }
 func main() {
-	arr := []int{0, 1, 2, 3, 4, 5}
+	// source := []string{"a/*comment", "line", "more_comment*/b"}
+	// source := []string{"/*Test program */", "int main()", "{ ", "  // variable declaration ", "int a, b, c;", "/* This is a test", "   multiline  ", "   comment for ", "   testing */", "a = b + c;", "}"}
+	// source := []string{"void func(int k) {", "// this function does nothing /*", "   k = k*2/4;", "   k = k/2;*/", "}"}
+	source := []string{"a//*b//*c", "blank", "d//*e/*/f"}
+	// expected := []string{"int main()", "{ ", "  ", "int a, b, c;", "a = b + c;", "}"}
 	// defer func() {
 	// 	if err := recover(); err != nil {
 	// 		log.Println(err)
 	// 	}
 	// }()
-	fmt.Println(longestMountain(arr))
+	ans := removeComments(source)
+	for i := 0; i < len(ans); i++ {
+		fmt.Println(ans[i], i)
+	}
+	// fmt.Println(reflect.DeepEqual(removeComments(source), expected))
+	// fmt.Println(removeComments(source))
 }
