@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=769 lang=golang
+ *
+ * [769] 最多能完成排序的块
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func maxChunksToSorted(arr []int) int {
 	n := len(arr)
 	var (
@@ -30,13 +31,6 @@ func maxChunksToSorted(arr []int) int {
 	}
 	return blocks
 }
-func main() {
-	arr := []int{4, 3, 2, 1, 0}
-	fmt.Println(maxChunksToSorted(arr))
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	// fmt.Println(removeComments(source))
-}
+
+// @lc code=end
+
