@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=289 lang=golang
+ *
+ * [289] 生命游戏
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 var direction = [][]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, 1}, {1, -1}}
 
 func gameOfLife(board [][]int) {
@@ -47,14 +48,6 @@ func gameOfLife(board [][]int) {
 		}
 	}
 }
-func main() {
-	arr := [][]int{{0, 1, 0}, {0, 0, 1}, {1, 1, 1}, {0, 0, 0}}
-	gameOfLife(arr)
-	fmt.Println(arr)
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	// fmt.Println(removeComments(source))
-}
+
+// @lc code=end
+
