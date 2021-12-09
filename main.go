@@ -14,33 +14,27 @@ func Max(i, j int) int {
 func lenLongestFibSubseq(arr []int) int {
 	n := len(arr)
 	var (
-		maxLen        int
-		length        int
-		first, second int
-		res           int
-		exists        map[int]bool
+		maxLen int
+		dict   map[int]int
+		record [][]int
 	)
-	exists = map[int]bool{}
-	for i := 0; i < n; i++ {
-		exists[arr[i]] = true
-	}
+	dict = map[int]int{}
+	record = make([][]int, n)
 	maxLen = 0
 	for i := 0; i < n; i++ {
-		for j := i + 1; j < n; j++ {
-			length = 2
-			first = arr[i]
-			second = arr[j]
-			res = first + second
-			for exists[res] {
-				length++
-				first = second
-				second = res
-				res = first + second
+		dict[arr[i]] = i
+		record[i] = make([]int, n)
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j < i; j++ {
+			k, ok := dict[arr[i]-arr[j]]
+			if (arr[i]-arr[j] < arr[j]) && ok {
+				record[j][i] = record[k][j] + 1
+				maxLen = Max(maxLen, record[j][i]+2)
 			}
-			maxLen = Max(maxLen, length)
 		}
 	}
-	if maxLen == 2 {
+	if maxLen < 3 {
 		return 0
 	}
 	return maxLen
