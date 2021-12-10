@@ -4,50 +4,88 @@ import (
 	"fmt"
 )
 
-func Max(i, j int) int {
+func Min(i, j int) int {
 	if i < j {
-		return j
+		return i
 	}
-	return i
+	return j
 }
 
-func lenLongestFibSubseq(arr []int) int {
-	n := len(arr)
-	var (
-		maxLen int
-		dict   map[int]int
-		record [][]int
-	)
-	dict = map[int]int{}
-	record = make([][]int, n)
-	maxLen = 0
-	for i := 0; i < n; i++ {
-		dict[arr[i]] = i
-		record[i] = make([]int, n)
+func Less(i, j []int) bool {
+	if i[0] == j[0] {
+		return i[1] < j[1]
 	}
-	for i := 0; i < n; i++ {
-		for j := 0; j < i; j++ {
-			k, ok := dict[arr[i]-arr[j]]
-			if (arr[i]-arr[j] < arr[j]) && ok {
-				record[j][i] = record[k][j] + 1
-				maxLen = Max(maxLen, record[j][i]+2)
-			}
+	return i[0] < j[0]
+}
+
+func qsort(arr [][]int, start int, end int) {
+	if start >= end {
+		return
+	}
+	left := start
+	right := end - 1
+	standard := arr[end]
+	for left < right {
+		for left < right && Less(arr[left], standard) {
+			left++
 		}
+		for left < right && Less(standard, arr[right]) {
+			right--
+		}
+		arr[left], arr[right] = arr[right], arr[left]
+		fmt.Println(arr[left], arr[right])
 	}
-	if maxLen < 3 {
-		return 0
+	if !Less(arr[left], arr[end]) {
+		arr[left], arr[end] = arr[end], arr[left]
+	} else {
+		left++
 	}
-	return maxLen
+	if left != 0 {
+		qsort(arr, start, left-1)
+	}
+	qsort(arr, left+1, end)
 }
 
+func sort(arr [][]int) {
+	qsort(arr, 0, len(arr)-1)
+}
+
+func findMinArrowShots(points [][]int) int {
+	n := len(points)
+	if n == 1 {
+		return n
+	}
+	// sort.Slice(points, func(i, j int) bool {
+	// 	return points[i][0] < points[j][0]
+	// })
+	sort(points)
+	fmt.Println(points)
+	var (
+		count int
+		// start int
+		end int
+	)
+	// start = points[0][0]
+	end = points[0][1]
+	count = 1
+	for i := 1; i < n; i++ {
+		if points[i][0] > end {
+			count++
+			// start = points[i][0]
+			end = points[i][1]
+			continue
+		}
+		// start = points[i][0]
+		end = Min(points[i][1], end)
+	}
+	return count
+}
 func main() {
-	arr := []int{1, 2, 3, 4, 5, 6, 7, 8}
-	// arr := []int{1, 3, 7, 11, 12, 14, 18}
-	// arr := []int{2, 4, 5, 6, 7, 8, 11, 13, 14, 15, 21, 22, 34}
-	fmt.Println(lenLongestFibSubseq(arr))
+	points := [][]int{{3, 9}, {7, 12}, {3, 8}, {6, 8}, {9, 10}, {2, 9}, {0, 9}, {3, 9}, {0, 6}, {2, 8}}
 	// defer func() {
 	// 	if err := recover(); err != nil {
 	// 		log.Println(err)
 	// 	}
 	// }()
+	fmt.Println(findMinArrowShots(points))
 }
