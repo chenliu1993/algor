@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=611 lang=golang
+ *
+ * [611] 有效三角形的个数
+ */
 
-import (
-	"fmt"
-	"sort"
-)
-
+// @lc code=start
 func triangleNumber(nums []int) int {
 	n := len(nums)
 	var (
@@ -25,12 +25,6 @@ func triangleNumber(nums []int) int {
 	}
 	return count
 }
-func main() {
-	nums := []int{2, 2, 3, 4}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(triangleNumber(nums))
-}
+
+// @lc code=end
+
