@@ -11,16 +11,23 @@ func triangleNumber(nums []int) int {
 		count int
 		cur   int
 	)
-	sort.Ints(nums)
 	count = 0
+	sort.Ints(nums)
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
 			cur = nums[i] + nums[j]
-			for k := j + 1; k < n; k++ {
-				if nums[k] < cur {
-					count++
+			left, right := j+1, n-1
+			k := j
+			for left <= right {
+				mid := (left + right) / 2
+				if nums[mid] < cur {
+					k = mid
+					left = mid + 1
+				} else {
+					right = mid - 1
 				}
 			}
+			count = count + k - j
 		}
 	}
 	return count
