@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=790 lang=golang
+ *
+ * [790] 多米诺和托米诺平铺
+ */
 
-import (
-	"fmt"
-	"math"
-)
-
+// @lc code=start
 func numTilings(n int) int {
 	if n == 1 {
 		return 1
@@ -32,12 +32,6 @@ func numTilings(n int) int {
 	}
 	return int(state[n-1][2])
 }
-func main() {
-	n := 2
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(numTilings(n))
-}
+
+// @lc code=end
+
