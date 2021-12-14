@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=692 lang=golang
+ *
+ * [692] 前K个高频单词
+ */
 
-import (
-	"fmt"
-	"sort"
-)
-
+// @lc code=start
 func Less(x, y string, dict map[string]int) bool {
 	if dict[x] == dict[y] {
 		return x < y
@@ -66,15 +66,5 @@ func topKFrequent(words []string, k int) []string {
 	return ans[:k]
 }
 
-func main() {
-	words := []string{"the", "day", "is", "sunny", "the", "the", "the", "sunny", "is", "is"}
-	k := 4
-	// words := []string{"i", "love", "leetcode", "i", "love", "coding"}
-	// k := 1
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(topKFrequent(words, k))
-}
+// @lc code=end
+
