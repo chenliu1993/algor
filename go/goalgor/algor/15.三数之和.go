@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=15 lang=golang
+ *
+ * [15] 三数之和
+ */
 
-import (
-	"fmt"
-	"sort"
-)
-
+// @lc code=start
 func threeSum(nums []int) [][]int {
 	var (
 		ans         [][]int
@@ -43,13 +43,5 @@ func threeSum(nums []int) [][]int {
 	return ans
 }
 
-func main() {
-	// num := []int{-1, 0, 1, 2, -1, -4}
-	num := []int{0, 0, 0}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(threeSum(num))
-}
+// @lc code=end
+
