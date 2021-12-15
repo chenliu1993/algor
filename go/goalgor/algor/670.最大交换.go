@@ -1,11 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=670 lang=golang
+ *
+ * [670] 最大交换
+ */
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-)
-
+// @lc code=start
 func maximumSwap(num int) int {
 	var (
 		j     int
@@ -35,13 +34,11 @@ func maximumSwap(num int) int {
 	maxEle := str[j]
 	max := j
 	for ; j < len(str); j++ {
-		fmt.Println(str[j])
 		if str[j] >= maxEle {
 			max = j
 			maxEle = str[j]
 		}
 	}
-	fmt.Println(max, str[max])
 	min := 0
 	for i := 0; i < spliter; i++ {
 		if str[i] < maxEle {
@@ -54,12 +51,5 @@ func maximumSwap(num int) int {
 	return ans
 }
 
-func main() {
-	num := 12335431
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(maximumSwap(num))
-}
+// @lc code=end
+
