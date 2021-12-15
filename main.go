@@ -2,64 +2,57 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
-func maximumSwap(num int) int {
+func threeSum(num int) [][]int {
 	var (
-		j     int
-		ans   int
-		str   []string
-		first bool
-		stk   []int
+		ans     [][]int
+		visited []int
+		cur     []int
+		iterate func(int, int)
 	)
-	first = true
-	str = strings.Split(strconv.Itoa(num), "")
-	stk = []int{}
-	for j = 0; j < len(str); j++ {
-		for len(stk) != 0 && str[stk[len(stk)-1]] < str[j] {
-			first = false
-			stk = stk[:len(stk)-1]
+	ans = [][]int{}
+	cur = []int{}
+	visited = make([]int, num)
+	iterate = func(sum, counter int) {
+		if sum > num {
+			return
 		}
-		if !first {
-			break
+		if sum == num {
+			if counter == 2 {
+				temp := make([]int, counter)
+				copy(temp, cur)
+				ans = append(ans, temp)
+			}
+			return
 		}
-		stk = append(stk, j)
-
-	}
-	if j == len(str) {
-		return num
-	}
-	spliter := j
-	maxEle := str[j]
-	max := j
-	for ; j < len(str); j++ {
-		fmt.Println(str[j])
-		if str[j] >= maxEle {
-			max = j
-			maxEle = str[j]
-		}
-	}
-	fmt.Println(max, str[max])
-	min := 0
-	for i := 0; i < spliter; i++ {
-		if str[i] < maxEle {
-			min = i
-			break
+		for i := 0; i < num; i++ {
+			if visited[i] != 1 {
+				if len(cur) != 0 {
+					if cur[len(cur)-1] > i {
+						continue
+					}
+				}
+				visited[i] = 1
+				cur = append(cur, i)
+				sum = sum + i
+				iterate(sum, counter+1)
+				sum = sum - i
+				cur = cur[:len(cur)-1]
+				visited[i] = 0
+			}
 		}
 	}
-	str[min], str[max] = str[max], str[min]
-	ans, _ = strconv.Atoi(strings.Join(str, ""))
+	iterate(0, 0)
 	return ans
 }
 
 func main() {
-	num := 12335431
+	num := 6
 	// defer func() {
 	// 	if err := recover(); err != nil {
 	// 		log.Println(err)
 	// 	}
 	// }()
-	fmt.Println(maximumSwap(num))
+	fmt.Println(threeSum(num))
 }
