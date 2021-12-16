@@ -1,9 +1,3 @@
-package main
-
-import (
-	"fmt"
-)
-
 func Max(i, j int) int {
 	if i < j {
 		return j
@@ -38,15 +32,4 @@ func subArrayRanges(nums []int) int64 {
 		}
 	}
 	return sum
-}
-
-func main() {
-	nums := []int{4, -2, -3, 4, 1}
-	// nums := []int{1, 2, 3}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(subArrayRanges(nums))
 }
