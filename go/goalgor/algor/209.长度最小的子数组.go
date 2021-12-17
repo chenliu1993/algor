@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=209 lang=golang
+ *
+ * [209] 长度最小的子数组
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func Min(x, y int) int {
 	if x < y {
 		return x
@@ -37,14 +38,5 @@ func minSubArrayLen(target int, nums []int) int {
 	return minLen
 }
 
-func main() {
-	target := 11
-	nums := []int{1, 1, 1, 1, 1, 1, 1, 1}
-	// nums := []int{1, 2, 3}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(minSubArrayLen(target, nums))
-}
+// @lc code=end
+
