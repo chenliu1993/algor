@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=560 lang=golang
+ *
+ * [560] 和为 K 的子数组
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func subarraySum(nums []int, k int) int {
 	n := len(nums)
 	sums := make([]int, n)
@@ -25,14 +26,5 @@ func subarraySum(nums []int, k int) int {
 	return count
 }
 
-func main() {
-	k := 3
-	nums := []int{1, 2, 3}
-	// nums := []int{1, 2, 3}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(subarraySum(nums, k))
-}
+// @lc code=end
+
