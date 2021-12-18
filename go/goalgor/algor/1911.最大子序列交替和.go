@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=1911 lang=golang
+ *
+ * [1911] 最大子序列交替和
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func Max(x, y int64) int64 {
 	if x < y {
 		return y
@@ -25,13 +26,5 @@ func maxAlternatingSum(nums []int) int64 {
 	return Max(even[n-1], odd[n-1])
 }
 
-func main() {
-	nums := []int{5, 6, 7, 8}
-	// nums := []int{1, 2, 3}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(maxAlternatingSum(nums))
-}
+// @lc code=end
+
