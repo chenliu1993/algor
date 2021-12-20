@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=918 lang=golang
+ *
+ * [918] 环形子数组的最大和
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func Max(x, y int) int {
 	if x < y {
 		return y
@@ -53,13 +54,5 @@ func maxSubarraySumCircular(nums []int) int {
 	return ans
 }
 
-func main() {
-	nums := []int{-2}
-	// nums := []int{1, 2, 3}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(maxSubarraySumCircular(nums))
-}
+// @lc code=end
+
