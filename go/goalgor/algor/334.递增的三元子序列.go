@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=334 lang=golang
+ *
+ * [334] 递增的三元子序列
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func increasingTriplet(nums []int) bool {
 	n := len(nums)
 	if n < 3 {
@@ -42,15 +43,5 @@ func increasingTriplet(nums []int) bool {
 	return flag
 }
 
-func main() {
-	nums := []int{2, 1, 5, 0, 4, 6}
-	// nums := []int{20, 100, 10, 12, 5, 13}
-	// nums := []int{1, 2, 1, 3}
-	// nums := []int{0, 1}
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	fmt.Println(increasingTriplet(nums))
-}
+// @lc code=end
+
