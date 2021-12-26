@@ -2,49 +2,119 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"strconv"
-	"strings"
 )
 
-func checkValidIP(blocks string, ip string) bool {
-	cidrs := strings.Split(blocks, "/")
-	masksVal, err := strconv.Atoi(cidrs[1])
-	if err != nil {
-		panic(err)
+// func divide(nums []int, start, end int) {
+// 	mid := (start + end) / 2
+// 	divide(nums, start, mid)
+// 	divide(nums, mid+1, end)
+// 	merge(nums, start, mid+1, end)
+// }
+
+// func merge(nums []int, start, rstart, end int) {
+// 	n := end - start + 1
+// 	holder := make([]int, n)
+// 	var (
+// 		ptr               int
+// 		leftPtr, rightPtr int
+// 	)
+// 	ptr = 0
+// 	leftPtr = start
+// 	rightPtr = rstart
+// 	for leftPtr < rstart && rightPtr <= end {
+// 		if nums[leftPtr] < nums[rightPtr] {
+// 			holder[ptr] = nums[leftPtr]
+// 			ptr++
+// 			leftPtr++
+// 		} else {
+// 			holder[ptr] = nums[rightPtr]
+// 			ptr++
+// 			rightPtr++
+// 		}
+// 	}
+// 	for leftPtr < rstart {
+// 		holder[ptr] = nums[leftPtr]
+// 		ptr++
+// 		leftPtr++
+// 	}
+// 	for rightPtr <= end {
+// 		holder[ptr] = nums[rightPtr]
+// 		ptr++
+// 		rightPtr++
+// 	}
+// 	for i := 0; i < n; i++ {
+// 		nums[start+i] = holder[i]
+// 	}
+// }
+
+// func MergeSort(nums []int) {
+// 	if len(nums) < 2 {
+// 		return
+// 	}
+// 	divide(nums, 0, len(nums)-1)
+// }
+
+func returnTarget(nums []int, isOdd bool) float64 {
+	if isOdd {
+		return float64(nums[len(nums)-1])
 	}
-	cidrFields := strings.Split(cidrs[0], ".")
-	ipFields := strings.Split(ip, ".")
-	if len(ipFields) != 4 || len(cidrFields) != 4 {
-		panic("Not a valid IP address")
-	}
+	return float64((nums[len(nums)-1] + nums[len(nums)-2])) / 2
+}
+
+func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
+	m := len(nums1)
+	n := len(nums2)
+	holder := []int{}
 	var (
-		first, second int32
+		isOdd             bool
+		leftPtr, rightPtr int
+		spliter           int
 	)
-	first = int32(0)
-	second = int32(0)
-	for i := 0; i < 4; i++ {
-		fVal, err := strconv.Atoi(cidrFields[i])
-		if err != nil {
-			panic(err)
-		}
-		sVal, err := strconv.Atoi(ipFields[i])
-		if err != nil {
-			panic(err)
-		}
-		first = first + int32(fVal<<(8*(3-i)))
-		second = second + int32(sVal<<(8*(3-i)))
+	if (m+n)%2 == 0 {
+		isOdd = false
+	} else {
+		isOdd = true
 	}
-	return (first >> (32 - masksVal)) == (second >> (32 - masksVal))
+	spliter = (m + n) / 2
+	leftPtr = 0
+	rightPtr = 0
+	for leftPtr < m && rightPtr < n {
+		if nums1[leftPtr] < nums2[rightPtr] {
+			holder = append(holder, nums1[leftPtr])
+			leftPtr++
+		} else {
+			holder = append(holder, nums2[rightPtr])
+			rightPtr++
+		}
+		if len(holder) == spliter+1 {
+			return returnTarget(holder, isOdd)
+		}
+	}
+	for leftPtr < m {
+		holder = append(holder, nums1[leftPtr])
+		leftPtr++
+		if len(holder) == spliter+1 {
+			return returnTarget(holder, isOdd)
+		}
+	}
+	for rightPtr < n {
+		holder = append(holder, nums2[rightPtr])
+		rightPtr++
+		if len(holder) == spliter+1 {
+			return returnTarget(holder, isOdd)
+		}
+	}
+	// Should not been here
+	return float64(0)
 }
 
 func main() {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-		}
-	}()
-	blocks := "192.168.1.0/24"
-	ip := "192.168.1.1"
-	fmt.Println(checkValidIP(blocks, ip))
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		log.Println(err)
+	// 	}
+	// }()
+	nums1 := []int{1, 3}
+	nums2 := []int{2}
+	fmt.Println(findMedianSortedArrays(nums1, nums2))
 }

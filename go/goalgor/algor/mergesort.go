@@ -65,3 +65,50 @@ func merge(src []int, leftPos, rightPos, rightEnd int) {
 		leftPosRecorder++
 	}
 }
+
+// func divide(nums []int, start, end int) {
+// 	mid := (start + end) / 2
+// 	divide(nums, start, mid)
+// 	divide(nums, mid+1, end)
+// 	merge(nums, start, mid+1, end)
+// }
+
+// func merge(nums []int, start, rstart, end int) {
+// 	n := end - start + 1
+// 	holder := make([]int, n)
+// 	var (
+// 		ptr               int
+// 		leftPtr, rightPtr int
+// 	)
+// 	ptr = 0
+// 	leftPtr = start
+// 	rightPtr = rstart
+// 	for leftPtr < rstart && rightPtr <= end {
+// 		if nums[leftPtr] < nums[rightPtr] {
+// 			holder[ptr] = nums[leftPtr]
+// 			ptr++
+// 			leftPtr++
+// 		} else {
+// 			holder[ptr] = nums[rightPtr]
+// 			ptr++
+// 			rightPtr++
+// 		}
+// 	}
+// 	for leftPtr < rstart {
+// 		holder[ptr] = nums[leftPtr]
+// 		ptr++
+// 		leftPtr++
+// 	}
+// 	for rightPtr <= end {
+// 		holder[ptr] = nums[rightPtr]
+// 		ptr++
+// 		rightPtr++
+// 	}
+// 	for i := 0; i < n; i++ {
+// 		nums[start+i] = holder[i]
+// 	}
+// }
+
+// func MergeSort(nums []int) {
+// 	divide(nums, 0, len(nums)-1)
+// }
