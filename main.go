@@ -4,23 +4,25 @@ import (
 	"fmt"
 )
 
-func firstMissingPositive(nums []int) int {
+func findRepeatNumber(nums []int) int {
 	n := len(nums)
 	hash := func(x int) int {
-		return x - 1
+		return x
 	}
 	for i := 0; i < n; i++ {
-		for nums[i] > 0 && nums[i] <= n && nums[hash(nums[i])] != nums[i] {
+		for nums[i] >= 0 && nums[i] < n && nums[hash(nums[i])] != nums[i] {
 			nums[hash(nums[i])], nums[i] = nums[i], nums[hash(nums[i])]
 		}
 	}
+	ans := []int{}
 	fmt.Println(nums)
 	for i := 0; i < n; i++ {
-		if i+1 != nums[i] {
-			return i + 1
+		if i != nums[i] {
+			ans = append(ans, nums[i])
 		}
 	}
-	return n + 1
+
+	return ans[0]
 }
 
 func main() {
@@ -33,8 +35,8 @@ func main() {
 	// for _, v := range nums {
 	// 	fmt.Println(firstMissingPositive(v))
 	// }
-	nums := []int{3, 4, -1, 1}
+	nums := []int{1, 1, 2, 3}
 	// nums := []int{2147483647, 100000, 1, 3, 2, 4, 5, 6, 7, 100001}
-	fmt.Println(firstMissingPositive(nums))
+	fmt.Println(findRepeatNumber(nums))
 
 }
