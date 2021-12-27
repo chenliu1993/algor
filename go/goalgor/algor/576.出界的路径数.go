@@ -1,8 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=576 lang=golang
+ *
+ * [576] 出界的路径数
+ */
 
-import (
-	"fmt"
-)
+// @lc code=start
 
 const MOD int = 1e9 + 7
 
@@ -46,16 +48,5 @@ func findPaths(m int, n int, maxMove int, startRow int, startColumn int) int {
 	return ans
 }
 
-func main() {
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }()
-	m := 7
-	n := 6
-	k := 13
-	row := 0
-	column := 2
-	fmt.Println(findPaths(m, n, k, row, column))
-}
+// @lc code=end
+
