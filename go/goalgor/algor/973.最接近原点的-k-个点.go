@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=973 lang=golang
+ *
+ * [973] 最接近原点的 K 个点
+ */
 
-import (
-	"fmt"
-	"math"
-)
-
+// @lc code=start
 func EuclidDistance(x1, y1 float64, x2, y2 float64) float64 {
 	return math.Sqrt(math.Pow(x2-x1, float64(2)) + math.Pow(y2-y1, float64(2)))
 }
@@ -135,8 +135,6 @@ func kClosest(points [][]int, k int) [][]int {
 	}
 	return ans
 }
-func main() {
-	points := [][]int{{1, 3}, {-2, 2}}
-	k := 1
-	fmt.Println(kClosest(points, k))
-}
+
+// @lc code=end
+
