@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=649 lang=golang
+ *
+ * [649] Dota2 参议院
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 var dict = map[string]string{
 	"R": "Radiant",
 	"D": "Dire",
@@ -61,7 +62,5 @@ func predictPartyVictory(senate string) string {
 	return dict[id]
 }
 
-func main() {
-	senate := "DDRRR"
-	fmt.Println(predictPartyVictory(senate))
-}
+// @lc code=end
+
