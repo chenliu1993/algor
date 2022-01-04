@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=781 lang=golang
+ *
+ * [781] 森林中的兔子
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func numRabbits(answers []int) int {
 	n := len(answers)
 	dict := map[int]int{}
@@ -30,7 +31,5 @@ func numRabbits(answers []int) int {
 	return n
 }
 
-func main() {
-	answers := []int{1, 1, 1, 0, 0}
-	fmt.Println(numRabbits(answers))
-}
+// @lc code=end
+
