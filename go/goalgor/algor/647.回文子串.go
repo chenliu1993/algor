@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=647 lang=golang
+ *
+ * [647] 回文子串
+ */
 
-import (
-	"fmt"
-	"strings"
-)
-
+// @lc code=start
 func countSubstrings(s string) int {
 	n := len(s)
 	var (
@@ -30,7 +30,5 @@ func countSubstrings(s string) int {
 	return len(ans)
 }
 
-func main() {
-	s := "abc"
-	fmt.Println(countSubstrings(s))
-}
+// @lc code=end
+
