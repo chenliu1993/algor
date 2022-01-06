@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=131 lang=golang
+ *
+ * [131] 分割回文串
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func isPali(s string) bool {
 	start, end := 0, len(s)-1
 	for start <= end {
@@ -42,7 +43,5 @@ func partition(s string) [][]string {
 
 }
 
-func main() {
-	s := "aaab"
-	fmt.Println(partition(s))
-}
+// @lc code=end
+
