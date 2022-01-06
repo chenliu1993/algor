@@ -1,8 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=712 lang=golang
+ *
+ * [712] 两个字符串的最小ASCII删除和
+ */
 
-import (
-	"fmt"
-)
+// @lc code=start
 
 func Max(i, j int) int {
 	if i < j {
@@ -49,8 +51,5 @@ func minimumDeleteSum(s1 string, s2 string) int {
 	return sum - record[n1-1][n2-1]
 }
 
-func main() {
-	s1 := "sea"
-	s2 := "eat"
-	fmt.Println(minimumDeleteSum(s1, s2))
-}
+// @lc code=end
+
