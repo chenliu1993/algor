@@ -2,55 +2,81 @@ package main
 
 import (
 	"fmt"
+	"sort"
 )
 
-func Max(i, j int) int {
-	if i < j {
-		return j
+// func Less(trip1, trip2 []int) bool {
+// 	if trip1[2] == trip2[2] {
+// 		return trip1[1] < trip2[1]
+// 	}
+// 	return trip1[2] < trip2[2]
+// }
+
+// func Swap(trip1, trip2 []int) {
+// 	temp := make([]int, len(trip1))
+// 	copy(temp, trip1)
+// 	for i := 0; i < 3; i++ {
+// 		trip1[i] = trip2[i]
+// 		trip2[i] = temp[i]
+// 	}
+// }
+
+// func hsort(trips [][]int, start, end int) {
+// 	for {
+// 		child := 2*start + 1
+// 		if child > end {
+// 			break
+// 		}
+// 		if child+1 <= end && Less(trips[child], trips[child+1]) {
+// 			child = child + 1
+// 		}
+// 		if Less(trips[start], trips[child]) {
+// 			Swap(trips[start], trips[child])
+// 			start = child
+// 		} else {
+// 			break
+// 		}
+// 	}
+// }
+
+// func Sort(trips [][]int) {
+// 	n := len(trips) - 1
+// 	for root := n / 2; root >= 0; root-- {
+// 		hsort(trips, root, n)
+// 	}
+// 	for end := n; end >= 0; end-- {
+// 		if Less(trips[end], trips[0]) {
+// 			Swap(trips[0], trips[end])
+// 			hsort(trips, 0, end-1)
+// 		}
+// 	}
+// }
+
+// func Min(i, j int) int {
+// 	if i < j {
+// 		return i
+// 	}
+// 	return j
+// }
+
+func carPooling(trips [][]int, capacity int) bool {
+	n := len(trips)
+	sum := make([]int, 1001)
+	for i := 0; i < n; i++ {
+		for j := trips[i][1]; j < trips[i][2]; j++ {
+			sum[j] += trips[i][0]
+		}
 	}
-	return i
-}
-func minimumDeleteSum(s1 string, s2 string) int {
-	n1 := len(s1)
-	n2 := len(s2)
-	var (
-		sum    int
-		record [][]int
-	)
-	sum = 0
-	record = make([][]int, n1)
-	for i := 0; i < n1; i++ {
-		record[i] = make([]int, n2)
-		if i != 0 {
-			record[i][0] = record[i-1][0]
-		}
-		if s1[i] == s2[0] {
-			record[i][0] = 2 * int(s2[0])
-		}
-		sum = sum + int(s1[i])
+	sort.Ints(sum)
+	if sum[len(sum)-1] > capacity {
+		return false
 	}
-	for i := 0; i < n2; i++ {
-		if i != 0 {
-			record[0][i] = record[0][i-1]
-		}
-		if s1[0] == s2[i] {
-			record[0][i] = 2 * int(s1[0])
-		}
-		sum = sum + int(s2[i])
-	}
-	for i := 1; i < n1; i++ {
-		for j := 1; j < n2; j++ {
-			record[i][j] = Max(record[i-1][j], record[i][j-1])
-			if s1[i] == s2[j] {
-				record[i][j] = Max(record[i][j], record[i-1][j-1]+int(s1[i])+int(s2[j]))
-			}
-		}
-	}
-	return sum - record[n1-1][n2-1]
+	return true
 }
 
 func main() {
-	s1 := "sea"
-	s2 := "eat"
-	fmt.Println(minimumDeleteSum(s1, s2))
+	// trips := [][]int{{8, 2, 3}, {4, 1, 3}, {1, 3, 6}, {8, 4, 6}, {4, 4, 8}}
+	trips := [][]int{{9, 3, 6}, {8, 1, 7}, {6, 6, 8}, {8, 4, 9}, {4, 2, 9}}
+	capacity := 28
+	fmt.Println(carPooling(trips, capacity))
 }
