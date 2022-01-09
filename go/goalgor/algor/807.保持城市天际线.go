@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=807 lang=golang
+ *
+ * [807] 保持城市天际线
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func Max(i, j int) int {
 	if i < j {
 		return j
@@ -48,9 +49,5 @@ func maxIncreaseKeepingSkyline(grid [][]int) int {
 	return ans
 }
 
-func main() {
-	// trips := [][]int{{8, 2, 3}, {4, 1, 3}, {1, 3, 6}, {8, 4, 6}, {4, 4, 8}}
-	// grid := [][]int{{3, 0, 8, 4}, {2, 4, 5, 7}, {9, 2, 6, 3}, {0, 3, 1, 0}}
-	grid := [][]int{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
-	fmt.Println(maxIncreaseKeepingSkyline(grid))
-}
+// @lc code=end
+
