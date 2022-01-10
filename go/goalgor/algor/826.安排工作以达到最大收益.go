@@ -1,8 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=826 lang=golang
+ *
+ * [826] 安排工作以达到最大收益
+ */
 
-import (
-	"fmt"
-)
+// @lc code=start
 
 type job struct {
 	id   int
@@ -98,9 +100,5 @@ func maxProfitAssignment(difficulty []int, profit []int, worker []int) int {
 	return ans
 }
 
-func main() {
-	difficulty := []int{68, 35, 52, 47, 86}
-	profit := []int{67, 17, 1, 81, 3}
-	worker := []int{92, 10, 85, 84, 82}
-	fmt.Println(maxProfitAssignment(difficulty, profit, worker))
-}
+// @lc code=end
+
