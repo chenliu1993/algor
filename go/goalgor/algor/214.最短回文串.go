@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=214 lang=golang
+ *
+ * [214] 最短回文串
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func shortestPalindrome(s string) string {
 	n := len(s)
 	if n == 0 {
@@ -41,7 +42,6 @@ func shortestPalindrome(s string) string {
 	}
 	return ans + s
 }
-func main() {
-	s := "aacecaaa"
-	fmt.Println(shortestPalindrome(s))
-}
+
+// @lc code=end
+
