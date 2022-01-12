@@ -1,11 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=8 lang=golang
+ *
+ * [8] 字符串转换整数 (atoi)
+ */
 
-import (
-	"fmt"
-	"math"
-	"strings"
-)
-
+// @lc code=start
 func myAtoi(s string) int {
 	s = strings.TrimLeft(s, " ")
 	if len(s) == 0 {
@@ -39,7 +38,6 @@ func myAtoi(s string) int {
 	}
 	return int(ans)
 }
-func main() {
-	s := "20000000000000000000"
-	fmt.Println(myAtoi(s))
-}
+
+// @lc code=end
+
