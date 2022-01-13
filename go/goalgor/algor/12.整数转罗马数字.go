@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=12 lang=golang
+ *
+ * [12] 整数转罗马数字
+ */
 
-import (
-	"fmt"
-	"strings"
-)
-
+// @lc code=start
 var dict = map[int]string{
 	1:    "I",
 	5:    "V",
@@ -69,7 +69,5 @@ func intToRoman(num int) string {
 	return ans
 }
 
-func main() {
-	num := 60
-	fmt.Println(intToRoman(num))
-}
+// @lc code=end
+
