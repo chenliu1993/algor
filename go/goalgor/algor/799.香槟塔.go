@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=799 lang=golang
+ *
+ * [799] 香槟塔
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 func champagneTower(poured int, query_row int, query_glass int) float64 {
 	var (
 		more, record [][]float64
@@ -43,9 +44,5 @@ func champagneTower(poured int, query_row int, query_glass int) float64 {
 	return record[query_row][query_glass]
 }
 
-func main() {
-	poured := 100000009
-	query_row := 33
-	query_glass := 17
-	fmt.Println(champagneTower(poured, query_row, query_glass))
-}
+// @lc code=end
+
