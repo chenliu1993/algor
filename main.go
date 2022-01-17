@@ -1,8 +1,8 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
-	"sort"
 )
 
 type ele struct {
@@ -10,32 +10,111 @@ type ele struct {
 	count int
 }
 
+type eles []*ele
+
+func (es eles) Less(i, j int) bool {
+	return es[i].count > es[j].count
+}
+
+func (es eles) Swap(i, j int) {
+	es[i], es[j] = es[j], es[i]
+}
+
+func (es eles) Len() int {
+	return len(es)
+}
+
+func (es *eles) Push(x interface{}) {
+	item := x.(*ele)
+	*es = append(*es, item)
+}
+
+func (es *eles) Pop() interface{} {
+	old := *es
+	n := len(old)
+	e := old[n-1]
+	old[n-1] = nil
+	*es = old[:n-1]
+	return e
+}
+
 func rearrangeBarcodes(barcodes []int) []int {
-	m := make(map[int]int)
-	for i := 0; i < len(barcodes); i++ {
-		m[barcodes[i]]++
+	n := len(barcodes)
+	if n == 1 {
+		return barcodes
 	}
-	n := make([]ele, 0, len(m))
-	for k, v := range m {
-		n = append(n, ele{k, v})
-	}
-	sort.Slice(n, func(i, j int) bool {
-		return n[i].count > n[j].count
-	})
-	ret := make([]int, len(barcodes))
-	start := 0
-	for _, v := range n {
-		val, count := v.val, v.count
-		for count > 0 {
-			ret[start] = val
-			start += 2
-			count--
-			if start >= len(barcodes) {
-				start = 1
-			}
+	es := eles{}
+	record := map[int]int{}
+	for _, v := range barcodes {
+		if _, ok := record[v]; !ok {
+			record[v] = 1
+		} else {
+			record[v]++
 		}
 	}
-	return ret
+	for k, v := range record {
+		heap.Push(&es, &ele{
+			val:   k,
+			count: v,
+		})
+	}
+	ans := make([]int, n)
+	var a *ele
+	i := 0
+	outbound := false
+	for i < n {
+		a = heap.Pop(&es).(*ele)
+		for a.count != 0 {
+			ans[i] = a.val
+			i = i + 2
+			a.count--
+			if a.count == 0 {
+				break
+			}
+			if i >= n {
+				outbound = true
+				break
+			}
+		}
+		if outbound {
+			break
+		}
+	}
+
+	i = 1
+	for i < n {
+		if a != nil {
+			for a.count != 0 {
+				ans[i] = a.val
+				i = i + 2
+				a.count--
+				if a.count == 0 {
+					break
+				}
+				if i >= n {
+					outbound = true
+					break
+				}
+			}
+		}
+		a = heap.Pop(&es).(*ele)
+		for a.count != 0 {
+			ans[i] = a.val
+			i = i + 2
+			a.count--
+			if a.count == 0 {
+				break
+			}
+			if i >= n {
+				outbound = true
+				break
+			}
+		}
+		if outbound {
+			heap.Push(&es, a)
+		}
+	}
+	return ans
 }
 
 func main() {
