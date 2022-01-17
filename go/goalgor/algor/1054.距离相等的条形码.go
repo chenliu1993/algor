@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=1054 lang=golang
+ *
+ * [1054] 距离相等的条形码
+ */
 
-import (
-	"fmt"
-	"sort"
-)
-
+// @lc code=start
 type ele struct {
 	val   int
 	count int
@@ -38,7 +38,5 @@ func rearrangeBarcodes(barcodes []int) []int {
 	return ret
 }
 
-func main() {
-	barcodes := []int{1, 1, 2, 2, 3, 3, 4, 4, 5, 5}
-	fmt.Println(rearrangeBarcodes(barcodes))
-}
+// @lc code=end
+
