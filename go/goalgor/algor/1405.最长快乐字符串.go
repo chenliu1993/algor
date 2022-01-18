@@ -1,10 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=1405 lang=golang
+ *
+ * [1405] 最长快乐字符串
+ */
 
-import (
-	"container/heap"
-	"fmt"
-)
-
+// @lc code=start
 type node struct {
 	val   byte
 	count int
@@ -101,9 +101,5 @@ func longestDiverseString(a int, b int, c int) string {
 	return string(ans)
 }
 
-func main() {
-	a := 2
-	b := 2
-	c := 1
-	fmt.Println(longestDiverseString(a, b, c))
-}
+// @lc code=end
+
