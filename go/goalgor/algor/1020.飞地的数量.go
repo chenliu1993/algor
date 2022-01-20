@@ -1,9 +1,10 @@
-package main
+/*
+ * @lc app=leetcode.cn id=1020 lang=golang
+ *
+ * [1020] 飞地的数量
+ */
 
-import (
-	"fmt"
-)
-
+// @lc code=start
 var directions = [][]int{{-1, 0}, {1, 0}, {0, 1}, {0, -1}}
 
 func numEnclaves(grid [][]int) int {
@@ -44,7 +45,5 @@ func numEnclaves(grid [][]int) int {
 	return ans
 }
 
-func main() {
-	grid := [][]int{{0, 0, 0, 0}, {1, 0, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}}
-	fmt.Println(numEnclaves(grid))
-}
+// @lc code=end
+
