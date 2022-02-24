@@ -25,4 +25,6 @@ func main() {
 		return
 	}
 	fmt.Println(res)
+	path, _ := filepath.EvalSymlinks("/home/workspace/shiyuelc/ltl")
+	fmt.Println(path)
 }
