@@ -1,4 +1,4 @@
-package algor2
+package main
 
 /**
  * Definition for a binary tree node.
