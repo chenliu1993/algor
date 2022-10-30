@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func iterate(input string) {
 	if len(input) == 0 {
 		ans = append(ans, string(target))
@@ -49,7 +47,7 @@ func letterCasePermutation(s string) []string {
 
 }
 
-func main() {
-	s := "3z4"
-	fmt.Println(letterCasePermutation(s))
-}
+// func main() {
+// 	s := "3z4"
+// 	fmt.Println(letterCasePermutation(s))
+// }
