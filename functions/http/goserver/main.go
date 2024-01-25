@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/gorilla/mux"
 )
@@ -41,6 +42,13 @@ func HelloPostHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("unmarshal error: %v", err)
 		w.Write([]byte("unmarshal error"))
 		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	fmt.Sprintf(string(content))
+
+	match, _ := regexp.MatchString("[nN]ame", string(content))
+	if match {
+		log.Print("match")
 	}
 
 	file, err := os.OpenFile("hello.txt", os.O_CREATE|os.O_WRONLY, 0644)
