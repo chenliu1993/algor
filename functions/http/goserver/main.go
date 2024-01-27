@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"regexp"
 
@@ -50,6 +51,8 @@ func HelloPostHandler(w http.ResponseWriter, r *http.Request) {
 	if match {
 		log.Print("match")
 	}
+
+	// http.Post("http://localhost:8090/hello", "application/json", r.Body)
 
 	file, err := os.OpenFile("hello.txt", os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
