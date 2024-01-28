@@ -3,13 +3,23 @@ package main
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 )
 
 func main() {
-	url := "https://www.facebook.com/favicon.ico"
+	url, err := url.Parse("https://www.facebook.com/favicon.ico")
+	if err != nil {
+		panic(err)
+	}
+	request := http.Request{
+		URL: url,
+		Header: http.Header{
+			"Content-Type": {"image/icon"},
+		},
+	}
 
-	resp, err := http.Get(url)
+	resp, err := http.DefaultClient.Do(&request)
 	if err != nil {
 		panic(err)
 	}
