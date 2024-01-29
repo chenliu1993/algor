@@ -19,11 +19,12 @@ print("The original list is : " + str(test_list))
 K = 'gfg'
  
 # groupby() used to group values and len() to compute Frequency
+# print(groupby(test_list, lambda sub: sub[K]))
 res = [{key: len(list(val))} for key, val in groupby(test_list, lambda sub: sub[K])]
  
  
 for key, val in groupby(test_list, lambda sub: sub[K]):
-    print(list(val))
+    print(key, list(val))
     
 # printing result 
 print("The Values Frequency : " + str(res))
